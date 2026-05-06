@@ -63,5 +63,14 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
     },
   },
+  {
+    // Plain Node.js scripts (build helpers, codegen) executed by `node`.
+    files: ['**/scripts/**/*.{js,mjs,cjs}', '**/*.config.{js,mjs,cjs}'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node },
+    },
+  },
   prettier,
 );
