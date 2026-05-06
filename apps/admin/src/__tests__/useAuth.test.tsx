@@ -4,9 +4,14 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { authStorage } from '@wdock/api-client';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthLogoutListener } from '@/hooks/useAuthLogoutListener';
 import { useAuthStore } from '@/stores/authStore';
 
-describe('useAuth', () => {
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <MemoryRouter>{children}</MemoryRouter>
+);
+
+describe('auth hooks', () => {
   beforeEach(() => {
     window.localStorage.clear();
     useAuthStore.setState({
@@ -25,11 +30,19 @@ describe('useAuth', () => {
     authStorage.setTokens('a', 'b');
   });
 
-  it('clears the session when auth:logout is dispatched', () => {
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <MemoryRouter>{children}</MemoryRouter>
-    );
-    renderHook(() => useAuth(), { wrapper });
+  it('useAuth.logout clears the store and the token storage', () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    act(() => {
+      result.current.logout();
+    });
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().user).toBeNull();
+    expect(authStorage.getAccess()).toBeNull();
+    expect(authStorage.getRefresh()).toBeNull();
+  });
+
+  it('useAuthLogoutListener clears the session when auth:logout is dispatched', () => {
+    renderHook(() => useAuthLogoutListener(), { wrapper });
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
 
     act(() => {
