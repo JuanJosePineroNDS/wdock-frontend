@@ -1,7 +1,7 @@
 import { create } from 'zustand';
-import type { components } from '@wdock/api-client';
+import type { User } from '@wdock/api-client';
 
-export type User = components['schemas']['User'];
+export type { User };
 
 interface AuthState {
   user: User | null;

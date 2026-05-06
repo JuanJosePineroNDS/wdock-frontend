@@ -10,7 +10,16 @@ describe('useAuth', () => {
   beforeEach(() => {
     window.localStorage.clear();
     useAuthStore.setState({
-      user: { id: 'u', email: 'a@b.c', first_name: 'A', last_name: 'B', role: 'admin', tenant_id: 't' },
+      user: {
+        id: 'u',
+        email: 'a@b.c',
+        rol: 'ADMIN',
+        activo: true,
+        is_staff: true,
+        tenant_id: 't',
+        tenant_nombre: 'Demo',
+        ultimo_login: null,
+      },
       isAuthenticated: true,
     });
     authStorage.setTokens('a', 'b');

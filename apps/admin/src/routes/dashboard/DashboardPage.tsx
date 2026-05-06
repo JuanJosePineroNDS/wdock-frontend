@@ -22,18 +22,18 @@ export function DashboardPage() {
             {user ? (
               <>
                 <div>
-                  <span className="text-slate-500">Nombre:</span>{' '}
-                  <span className="font-medium" data-testid="user-name">
-                    {user.first_name} {user.last_name}
+                  <span className="text-slate-500">Email:</span>{' '}
+                  <span className="font-medium" data-testid="user-email">
+                    {user.email}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Email:</span>{' '}
-                  <span className="font-medium">{user.email}</span>
+                  <span className="text-slate-500">Tenant:</span>{' '}
+                  <span className="font-medium">{user.tenant_nombre}</span>
                 </div>
                 <div>
                   <span className="text-slate-500">Rol:</span>{' '}
-                  <span className="font-medium uppercase">{user.role}</span>
+                  <span className="font-medium uppercase">{user.rol}</span>
                 </div>
               </>
             ) : (

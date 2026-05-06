@@ -55,10 +55,12 @@ describe('LoginPage', () => {
         user: {
           id: 'u1',
           email: 'admin@wdock.com',
-          first_name: 'Ada',
-          last_name: 'Lovelace',
-          role: 'admin',
+          rol: 'ADMIN',
+          activo: true,
+          is_staff: true,
           tenant_id: 't1',
+          tenant_nombre: 'WDock Demo',
+          ultimo_login: null,
         },
       },
       error: undefined,
@@ -71,7 +73,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: /iniciar sesion/i }));
 
     await waitFor(() => expect(mockApi.POST).toHaveBeenCalledTimes(1));
-    expect(mockApi.POST).toHaveBeenCalledWith('/api/auth/login/', {
+    expect(mockApi.POST).toHaveBeenCalledWith('/api/v1/auth/login', {
       body: { email: 'admin@wdock.com', password: 'secret123' },
     });
     await waitFor(() => expect(screen.getByText('Dashboard')).toBeInTheDocument());

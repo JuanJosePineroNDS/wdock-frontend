@@ -34,7 +34,7 @@ export function LoginPage() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setServerError(null);
-    const { data, error, response } = await api.POST('/api/auth/login/', {
+    const { data, error, response } = await api.POST('/api/v1/auth/login', {
       body: values,
     });
 

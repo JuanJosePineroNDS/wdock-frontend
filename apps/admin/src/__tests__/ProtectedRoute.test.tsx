@@ -31,7 +31,16 @@ describe('ProtectedRoute', () => {
 
   it('renders the child route when authenticated', () => {
     useAuthStore.setState({
-      user: { id: 'u', email: 'a@b.c', first_name: 'A', last_name: 'B', role: 'admin', tenant_id: 't' },
+      user: {
+        id: 'u',
+        email: 'a@b.c',
+        rol: 'ADMIN',
+        activo: true,
+        is_staff: true,
+        tenant_id: 't',
+        tenant_nombre: 'Demo',
+        ultimo_login: null,
+      },
       isAuthenticated: true,
     });
     setup('/dashboard');
