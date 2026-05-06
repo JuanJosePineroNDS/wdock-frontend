@@ -4,7 +4,16 @@ Plataforma documental WDock — frontend monorepo. Sustituye a DocuWare para la 
 
 ## Estado del proyecto
 
-Setup inicial completado. La Semana 1 (cimientos del monorepo + apps básicas) está en desarrollo en la rama `feature/week-1-foundations`.
+**Semana 1 completada** en `feature/week-1-foundations` (PR pendiente de revisión hacia `develop`).
+
+- Monorepo pnpm con `apps/admin`, `apps/tablet`, `apps/operator`, `packages/api-client`, `packages/shared`.
+- Cliente API tipado (`@wdock/api-client`) con tipos generados desde OpenAPI, interceptor JWT y refresh automático.
+- Paquete compartido (`@wdock/shared`) con validadores Zod (DNI, NIE, CIF, VIN), SHA-256, hooks reutilizables.
+- App admin con login (RHF + Zod), rutas protegidas y layout base.
+- App tablet PWA con pantalla de firma (placeholder hasta Semana 2), service worker y modo offline.
+- App operator placeholder.
+- ESLint flat config, Prettier, EditorConfig, GitHub Actions CI.
+- 53 tests verdes (10 api-client + 30 shared + 7 admin + 6 tablet).
 
 ## Stack tecnológico
 
