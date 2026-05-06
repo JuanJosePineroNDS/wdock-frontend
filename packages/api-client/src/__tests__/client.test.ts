@@ -73,11 +73,21 @@ describe('createApiClient', () => {
   it('attaches Bearer token when one is stored', async () => {
     storage.setTokens('access-token', 'refresh-token');
     const { fn, calls } = recordingFetch([
-      () => jsonResponse({ id: 'u1', email: 'a@b.com', first_name: 'A', last_name: 'B', role: 'admin', tenant_id: 't1' }),
+      () =>
+        jsonResponse({
+          id: 'u1',
+          email: 'a@b.com',
+          rol: 'ADMIN',
+          activo: true,
+          is_staff: true,
+          tenant_id: 't1',
+          tenant_nombre: 'Demo',
+          ultimo_login: null,
+        }),
     ]);
     const client = createApiClient({ baseUrl, storage, fetch: fn });
 
-    await client.GET('/api/auth/me/');
+    await client.GET('/api/v1/auth/me');
 
     expect(calls).toHaveLength(1);
     expect(calls[0].headers.get('Authorization')).toBe('Bearer access-token');
@@ -90,13 +100,23 @@ describe('createApiClient', () => {
         jsonResponse({
           access: 'a',
           refresh: 'r',
-          user: { id: 'u', email: 'a@b.c', first_name: '', last_name: '', role: 'admin', tenant_id: 't' },
+          user: {
+            id: 'u',
+            email: 'a@b.c',
+            rol: 'ADMIN',
+            activo: true,
+            is_staff: false,
+            tenant_id: 't',
+            tenant_nombre: 'Demo',
+            ultimo_login: null,
+          },
         }),
     ]);
     const client = createApiClient({ baseUrl, storage, fetch: fn });
 
-    await client.POST('/api/auth/login/', { body: { email: 'a@b.c', password: 'x' } });
+    await client.POST('/api/v1/auth/login', { body: { email: 'a@b.c', password: 'x' } });
 
+    expect(calls[0].url).toContain('/api/v1/auth/login');
     expect(calls[0].headers.get('Authorization')).toBeNull();
   });
 
@@ -110,18 +130,20 @@ describe('createApiClient', () => {
         jsonResponse({
           id: 'u1',
           email: 'a@b.c',
-          first_name: 'A',
-          last_name: 'B',
-          role: 'admin',
+          rol: 'ADMIN',
+          activo: true,
+          is_staff: true,
           tenant_id: 't1',
+          tenant_nombre: 'Demo',
+          ultimo_login: null,
         }),
     ]);
     const client = createApiClient({ baseUrl, storage, fetch: fn, onAuthLogout: onLogout });
 
-    const result = await client.GET('/api/auth/me/');
+    const result = await client.GET('/api/v1/auth/me');
 
     expect(calls).toHaveLength(3);
-    expect(calls[1].url).toContain('/api/auth/refresh/');
+    expect(calls[1].url).toContain('/api/v1/auth/refresh');
     expect(storage.getAccess()).toBe('new-access');
     expect(storage.getRefresh()).toBe('new-refresh');
     expect(onLogout).not.toHaveBeenCalled();
@@ -140,7 +162,7 @@ describe('createApiClient', () => {
     ]);
     const client = createApiClient({ baseUrl, storage, fetch: fn, onAuthLogout: onLogout });
 
-    const result = await client.GET('/api/auth/me/');
+    const result = await client.GET('/api/v1/auth/me');
 
     expect(onLogout).toHaveBeenCalledTimes(1);
     expect(storage.getAccess()).toBeNull();
@@ -155,7 +177,7 @@ describe('createApiClient', () => {
     ]);
     const client = createApiClient({ baseUrl, storage, fetch: fn, onAuthLogout: onLogout });
 
-    await client.GET('/api/auth/me/');
+    await client.GET('/api/v1/auth/me');
 
     // No refresh token means we never attempt the refresh; logout is not triggered automatically here,
     // but the response is the original 401 and the caller should react.

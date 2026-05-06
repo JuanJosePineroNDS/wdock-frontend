@@ -7,3 +7,9 @@ export {
 } from './auth-storage';
 export { ApiError, AuthError, ValidationError } from './errors';
 export type { paths, components, operations, webhooks } from './generated/schema';
+export type {
+  User,
+  LoginRequest,
+  LoginResponse,
+  WdockPaths,
+} from './schema-overrides';

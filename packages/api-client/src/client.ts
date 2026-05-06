@@ -2,7 +2,7 @@ import createClient, { type Client, type Middleware } from 'openapi-fetch';
 
 import { type AuthStorage, authStorage as defaultStorage } from './auth-storage';
 import { ApiError, AuthError, ValidationError } from './errors';
-import type { paths } from './generated/schema';
+import type { WdockPaths } from './schema-overrides';
 
 export interface CreateApiClientOptions {
   baseUrl: string;
@@ -12,7 +12,7 @@ export interface CreateApiClientOptions {
    */
   fetch?: typeof fetch;
   /**
-   * Path to the refresh endpoint relative to baseUrl. Defaults to '/api/auth/refresh/'.
+   * Path to the refresh endpoint relative to baseUrl. Defaults to '/api/v1/auth/refresh'.
    */
   refreshPath?: string;
   /**
@@ -22,7 +22,7 @@ export interface CreateApiClientOptions {
   onAuthLogout?: () => void;
 }
 
-export type WdockApiClient = Client<paths>;
+export type WdockApiClient = Client<WdockPaths>;
 
 const PUBLIC_PATH_FRAGMENTS = ['/auth/login', '/auth/refresh', '/sign/'];
 
@@ -139,10 +139,10 @@ function buildAuthMiddleware(
 export function createApiClient(options: CreateApiClientOptions): WdockApiClient {
   const storage = options.storage ?? defaultStorage;
   const fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
-  const refreshUrl = `${options.baseUrl.replace(/\/$/, '')}${options.refreshPath ?? '/api/auth/refresh/'}`;
+  const refreshUrl = `${options.baseUrl.replace(/\/$/, '')}${options.refreshPath ?? '/api/v1/auth/refresh'}`;
   const onLogout = options.onAuthLogout ?? defaultLogout;
 
-  const client = createClient<paths>({
+  const client = createClient<WdockPaths>({
     baseUrl: options.baseUrl,
     fetch: fetchImpl,
   });
