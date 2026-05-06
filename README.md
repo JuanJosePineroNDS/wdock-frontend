@@ -4,16 +4,36 @@ Plataforma documental WDock — frontend monorepo. Sustituye a DocuWare para la 
 
 ## Estado del proyecto
 
-**Semana 1 completada** en `feature/week-1-foundations` (PR pendiente de revisión hacia `develop`).
+**Semanas 2-3 (MVP vertical) completadas** en `feature/week-2-3-signature-and-admin` (PR pendiente de revisión hacia `develop`).
 
-- Monorepo pnpm con `apps/admin`, `apps/tablet`, `apps/operator`, `packages/api-client`, `packages/shared`.
-- Cliente API tipado (`@wdock/api-client`) con tipos generados desde OpenAPI, interceptor JWT y refresh automático.
-- Paquete compartido (`@wdock/shared`) con validadores Zod (DNI, NIE, CIF, VIN), SHA-256, hooks reutilizables.
-- App admin con login (RHF + Zod), rutas protegidas y layout base.
-- App tablet PWA con pantalla de firma (placeholder hasta Semana 2), service worker y modo offline.
-- App operator placeholder.
-- ESLint flat config, Prettier, EditorConfig, GitHub Actions CI.
-- 53 tests verdes (10 api-client + 30 shared + 7 admin + 6 tablet).
+Esta entrega cubre el camino de extremo a extremo "ERP envía documento → admin crea sesión → conductor firma en tablet → backend procesa". Quedan fuera, para PRs posteriores, RGPD/geolocalización, modo offline, polish de PWA, gestión de usuarios e integraciones ERP.
+
+### Lo que sí está incluido en este MVP
+
+**Tablet:**
+- `SignaturePad` real con `signature_pad@5`, captura por Pointer Events de cada punto `{x, y, t (ms relativo), p (presión)}` y metadata derivada (duración, presiones, velocidad media). Botón "Limpiar" con tamaño táctil.
+- `PdfViewer` con `pdfjs-dist@4`, navegación entre páginas, zoom 50–200%, manejo de carga y error.
+- `SignaturePage` E2E: carga la `PublicSession` por token, calcula el SHA-256 del PDF en cliente con Web Crypto, valida contra `hash_documento_esperado`, envía el `SignSubmitRequest` tipado y redirige a `/sign/done`. Botón "Rechazar" exige razón no vacía y navega a `/sign/rejected`.
+
+**Admin:**
+- Hook global `useAuthLogoutListener` montado en App: el evento `auth:logout` (que dispara el cliente API tras refresh fallido) limpia el store y redirige a `/login` desde cualquier pantalla.
+- Listado de documentos `/documents` con TanStack Query, paginación, badges de estado (mapeados desde `@wdock/shared/constants`), skeleton, error y empty state.
+- Detalle `/documents/:id` con datos básicos, lista de vehículos y vista previa del PDF en iframe (apunta al endpoint que redirige al presigned MinIO).
+- Modal "Crear sesión de firma" con `modalidad`/`firmante_nombre`/`firmante_dni`/`ttl_minutes`, llamada al endpoint del backend y vista de éxito con QR (`qrcode.react`) + copiar URL.
+
+### Lo que se queda fuera (PRs separados)
+
+- 1.3 Geolocalización con consentimiento.
+- 1.4 Aviso legal RGPD.
+- 1.6 Modo offline con IndexedDB.
+- 1.7 Pulido PWA (orientación, gestos, iconos finales).
+- 2.5 Gestión de usuarios.
+- 2.6 Gestión de integraciones ERP.
+- Filtros avanzados en listado y tabs (Evidencias / Historial / Versiones) en detalle.
+
+### Tests
+
+78 verdes (10 api-client + 30 shared + 23 tablet + 15 admin).
 
 ## Stack tecnológico
 
