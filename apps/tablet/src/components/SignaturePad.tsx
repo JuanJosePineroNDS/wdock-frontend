@@ -55,7 +55,7 @@ export function SignaturePad({
   ariaLabel = 'Area de firma',
   className,
   innerRef,
-}: SignaturePadProps & { innerRef?: React.Ref<SignaturePadHandle> }) {
+}: SignaturePadProps & { innerRef?: React.Ref<SignaturePadHandle | null> }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const padRef = useRef<SignaturePadLib | null>(null);
   const [isEmpty, setIsEmpty] = useState(true);

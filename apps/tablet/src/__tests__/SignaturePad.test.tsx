@@ -47,7 +47,7 @@ vi.mock('signature_pad', () => ({
   default: FakePad,
 }));
 
-import { SignaturePad } from '@/components/SignaturePad';
+import { SignaturePad, type SignaturePadHandle } from '@/components/SignaturePad';
 
 describe('SignaturePad', () => {
   beforeEach(() => {
@@ -85,9 +85,7 @@ describe('SignaturePad', () => {
   });
 
   it('exposes collect() that returns flattened, time-rebased points and metadata', () => {
-    const handle: { current: null | { collect: () => unknown; clear: () => void; isEmpty: () => boolean } } = {
-      current: null,
-    };
+    const handle = { current: null } as React.RefObject<SignaturePadHandle | null>;
     render(<SignaturePad innerRef={handle} />);
     const pad = lastInstance.current!;
     pad.isEmptyValue = false;
@@ -104,10 +102,7 @@ describe('SignaturePad', () => {
         ],
       },
     ];
-    const result = handle.current!.collect() as {
-      points: { x: number; y: number; t: number; p: number }[];
-      metadata: { num_puntos: number; duracion_ms: number };
-    };
+    const result = handle.current!.collect();
     expect(result.points).toHaveLength(3);
     // Time is rebased to the first captured point.
     expect(result.points[0].t).toBe(0);

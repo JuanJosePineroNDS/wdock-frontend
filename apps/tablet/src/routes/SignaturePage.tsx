@@ -58,7 +58,7 @@ export function SignaturePage({ sessionOptions }: SignaturePageProps = {}) {
       </header>
       <div className="grid flex-1 grid-cols-2 gap-4">
         <PdfViewer url={document.pdf_url} />
-        <SignaturePad disabled />
+        <SignaturePad />
       </div>
       <footer className="mt-4 flex items-center justify-end gap-4">
         <Button variant="secondary" data-testid="cancel-button">
