@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
 // Vite serves the worker as a static module; the ?url suffix gives a stable URL.
-// eslint-disable-next-line import/no-unresolved
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { cn } from '@wdock/shared/utils';
 
