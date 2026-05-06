@@ -11,7 +11,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["v1_admin_webhooks_retrieve"];
+        /**
+         * List webhook deliveries for the current tenant (ADMIN only)
+         * @description Tenant-scoped paginated listing for tenant admins. Filterable by estado / evento / integracion. Returns 403 when the JWT does not carry rol=ADMIN.
+         */
+        get: operations["admin_webhooks_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -29,7 +33,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["v1_admin_webhooks_retry_create"];
+        /**
+         * Force-retry a webhook delivery (ADMIN only)
+         * @description Resets a webhook delivery to PENDIENTE / intento=0 and re-enqueues the Celery task. Audited as ``webhook.retry.manual``.
+         */
+        post: operations["admin_webhooks_retry"];
         delete?: never;
         options?: never;
         head?: never;
@@ -45,7 +53,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["v1_auth_login_create"];
+        /**
+         * Email/password login
+         * @description Validates the user credentials and returns a JWT access + refresh pair plus the authenticated user payload. After 5 consecutive failures the account is locked for 15 minutes (HTTP 423).
+         */
+        post: operations["auth_login"];
         delete?: never;
         options?: never;
         head?: never;
@@ -61,7 +73,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["v1_auth_logout_create"];
+        /**
+         * Blacklist the supplied refresh token
+         * @description Revokes the refresh JWT so it cannot be exchanged again. The associated access JWT is short-lived and will simply expire.
+         */
+        post: operations["auth_logout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -75,7 +91,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["v1_auth_me_retrieve"];
+        /**
+         * Return the authenticated user's profile
+         * @description Reads ``request.user`` and serialises the public profile.
+         */
+        get: operations["auth_me"];
         put?: never;
         post?: never;
         delete?: never;
@@ -94,10 +114,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Takes a refresh type JSON web token and returns an access type JSON web
-         *     token if the refresh token is valid.
+         * Exchange a refresh token for a new access token
+         * @description Standard Simple JWT refresh endpoint. With ``ROTATE_REFRESH_TOKENS=True`` the refresh JWT is also rotated, so replace it in the client storage.
          */
-        post: operations["v1_auth_refresh_create"];
+        post: operations["auth_refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -112,20 +132,16 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description ERP-facing documents API.
-         *
-         *     Authentication: OAuth2 access token (Bearer).
-         *     Authorization : token + ErpIntegration must carry the required scope.
+         * List documents for the calling tenant
+         * @description Paginated list with filters and ordering; tenant-scoped.
          */
-        get: operations["v1_documents_retrieve"];
+        get: operations["documents_list"];
         put?: never;
         /**
-         * @description ERP-facing documents API.
-         *
-         *     Authentication: OAuth2 access token (Bearer).
-         *     Authorization : token + ErpIntegration must carry the required scope.
+         * Upload a document (PDF / image) for processing
+         * @description Accepts a base64-encoded document up to 25 MB, validates MIME via libmagic and the SHA-256 hash, persists it on MinIO, creates the Document row plus any Vehicle children, and dispatches the ``document.received`` webhook. Idempotency-Key replays the cached 202 for 24 h when the same key+payload arrives twice.
          */
-        post: operations["v1_documents_create"];
+        post: operations["documents_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -142,13 +158,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description POST /api/v1/documents/{document_id}/signature/sessions
-         *
-         *     Accepts either an OAuth client_credentials token (scope ``signature.read``)
-         *     or a JWT for an admin/operator user. The view resolves the appropriate
-         *     Document scope based on the auth method.
+         * Create a signature session for a document
+         * @description Creates a SignatureSession bound to ``document_id``. Authenticate either with an OAuth client_credentials token carrying the ``signature.read`` scope, or with a user JWT. Returns the ``signing_url`` (frontend deep-link) embedding a uuid4 token.
          */
-        post: operations["v1_documents_signature_sessions_create"];
+        post: operations["signature_session_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -163,21 +176,20 @@ export interface paths {
             cookie?: never;
         };
         /**
+         * Retrieve one document by id
          * @description ERP-facing documents API.
          *
          *     Authentication: OAuth2 access token (Bearer).
          *     Authorization : token + ErpIntegration must carry the required scope.
          */
-        get: operations["v1_documents_retrieve_2"];
+        get: operations["documents_retrieve"];
         put?: never;
         post?: never;
         /**
-         * @description ERP-facing documents API.
-         *
-         *     Authentication: OAuth2 access token (Bearer).
-         *     Authorization : token + ErpIntegration must carry the required scope.
+         * Soft-delete a document (mark ANULADO)
+         * @description Marks the document as ANULADO and audits with the supplied razon. Forbidden once the document is in a terminal state (409).
          */
-        delete: operations["v1_documents_destroy"];
+        delete: operations["documents_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -191,12 +203,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description ERP-facing documents API.
-         *
-         *     Authentication: OAuth2 access token (Bearer).
-         *     Authorization : token + ErpIntegration must carry the required scope.
+         * Download the evidence ZIP bundle
+         * @description Streams an ``application/zip`` containing metadata.json, audit_log.json and the signed PDF. Only available once the Document is in a terminal state (FIRMADO or ARCHIVADO).
          */
-        get: operations["v1_documents_evidencias_retrieve"];
+        get: operations["documents_evidencias"];
         put?: never;
         post?: never;
         delete?: never;
@@ -213,12 +223,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description ERP-facing documents API.
-         *
-         *     Authentication: OAuth2 access token (Bearer).
-         *     Authorization : token + ErpIntegration must carry the required scope.
+         * Redirect to the document PDF presigned URL (5 min TTL)
+         * @description Prefers the signed PDF when available, falls back to the original. Always returns 302 with a presigned MinIO URL in ``Location``.
          */
-        get: operations["v1_documents_pdf_retrieve"];
+        get: operations["documents_pdf"];
         put?: never;
         post?: never;
         delete?: never;
@@ -234,7 +242,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["v1_signature_sessions_retrieve"];
+        /**
+         * Tablet-facing session detail (PUBLIC by token)
+         * @description Returns the minimal payload the tablet needs to render the signing screen: a 5-minute presigned PDF URL, the expected SHA-256 and the current state. Throttled per IP at 60/min.
+         */
+        get: operations["signature_session_public_detail"];
         put?: never;
         post?: never;
         delete?: never;
@@ -253,11 +265,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Cancel the session. We force a non-empty ``razon`` so that a leaked
-         *     token cannot trivially cancel a signature with a one-click probe — the
-         *     rejector at least has to type something the audit log can show.
+         * Reject the session (PUBLIC by token, razon required)
+         * @description Marks the session as CANCELADA and dispatches the ``signature.rejected`` webhook. ``razon`` must not be empty so a leaked-token actor cannot drop a signature with one click without leaving a trace.
          */
-        post: operations["v1_signature_sessions_reject_create"];
+        post: operations["signature_session_public_reject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -274,13 +285,30 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Submit the signature payload.
-         *
-         *     State transitions are protected by ``select_for_update`` so that two
-         *     concurrent POSTs with the same token cannot both pass through the state
-         *     check. ``hmac.compare_digest`` is used for the document hash compare.
+         * Submit the signed trace (PUBLIC by token)
+         * @description Validates the biometric trace anti-fraud rules (≥30 points, 200 ms–60 s, velocity 50–2000 px/s, varied pressure, non-collinear), checks the document hash, persists the encrypted evidence and enqueues the PAdES signing pipeline.
          */
-        post: operations["v1_signature_sessions_sign_create"];
+        post: operations["signature_session_public_sign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * OAuth 2.0 client_credentials token endpoint
+         * @description Issues a short-lived Bearer access token for an ``ErpIntegration``. The body must be ``application/x-www-form-urlencoded`` per RFC 6749.
+         */
+        post: operations["oauth_token"];
         delete?: never;
         options?: never;
         head?: never;
@@ -291,9 +319,549 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        TokenRefresh: {
-            readonly access: string;
+        /**
+         * @description * `ADMIN` - Administrador
+         *     * `OPERADOR` - Operador
+         *     * `INTEGRACION_ERP` - Integración ERP
+         *     * `AUDITOR` - Auditor
+         *     * `SOLO_LECTURA` - Sólo lectura
+         * @enum {string}
+         */
+        AuthRole: "ADMIN" | "OPERADOR" | "INTEGRACION_ERP" | "AUDITOR" | "SOLO_LECTURA";
+        /** @description Body of ``POST /api/v1/documents``. */
+        DocumentCreateRequest: {
+            /**
+             * @description Document type — drives downstream workflow.
+             *
+             *     * `ALBARAN_RECEPCION` - Albarán de recepción
+             *     * `ALBARAN_ENTREGA` - Albarán de entrega
+             *     * `OTRO` - Otro
+             * @default ALBARAN_RECEPCION
+             */
+            tipo: components["schemas"]["DocumentTipo"];
+            /** @description ERP-side document identifier; unique per (tenant, ERP integration). */
+            numero_origen: string;
+            /**
+             * Format: date
+             * @description Original issue date on the document (ISO 8601).
+             */
+            fecha_emision?: string | null;
+            transportista?: components["schemas"]["TransportistaRequest"];
+            /** @description Vehicles described by this delivery note. */
+            vehiculos?: components["schemas"]["VehicleInputRequest"][];
+            firma_config?: components["schemas"]["FirmaConfigRequest"];
+            documento: components["schemas"]["DocumentoBlobRequest"];
+            /**
+             * Format: uri
+             * @description Optional URL the integration wants pinged once the doc is signed.
+             */
+            callback_url?: string;
+            /** @description Arbitrary JSON metadata stored on Document.metadatos. */
+            metadatos_extra?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * @description * `RECIBIDO` - Recibido
+         *     * `PROCESANDO` - Procesando
+         *     * `PROCESADO` - Procesado
+         *     * `PENDIENTE_REVISION` - Pendiente de revisión
+         *     * `PENDIENTE_FIRMA` - Pendiente de firma
+         *     * `FIRMADO` - Firmado
+         *     * `ARCHIVADO` - Archivado
+         *     * `ERROR` - Error
+         *     * `ANULADO` - Anulado
+         * @enum {string}
+         */
+        DocumentEstado: "RECIBIDO" | "PROCESANDO" | "PROCESADO" | "PENDIENTE_REVISION" | "PENDIENTE_FIRMA" | "FIRMADO" | "ARCHIVADO" | "ERROR" | "ANULADO";
+        /** @description Full Document representation returned by retrieve and list endpoints. */
+        DocumentOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            /** Format: uuid */
+            readonly erp_integration: string | null;
+            readonly numero_origen: string;
+            /**
+             * @description Document type.
+             *
+             *     * `ALBARAN_RECEPCION` - Albarán de recepción
+             *     * `ALBARAN_ENTREGA` - Albarán de entrega
+             *     * `OTRO` - Otro
+             */
+            readonly tipo: components["schemas"]["DocumentTipo"];
+            /**
+             * @description Lifecycle state — see DocumentEstado.
+             *
+             *     * `RECIBIDO` - Recibido
+             *     * `PROCESANDO` - Procesando
+             *     * `PROCESADO` - Procesado
+             *     * `PENDIENTE_REVISION` - Pendiente de revisión
+             *     * `PENDIENTE_FIRMA` - Pendiente de firma
+             *     * `FIRMADO` - Firmado
+             *     * `ARCHIVADO` - Archivado
+             *     * `ERROR` - Error
+             *     * `ANULADO` - Anulado
+             */
+            readonly estado: components["schemas"]["DocumentEstado"];
+            readonly hash_sha256: string;
+            readonly size_bytes: number;
+            readonly mime_type: string;
+            readonly metadatos: unknown;
+            /** Format: date-time */
+            readonly creado_en: string;
+            /** Format: date-time */
+            readonly actualizado_en: string;
+            readonly vehiculos: components["schemas"]["VehicleOutput"][];
+        };
+        /** @description Compact 202 response shape returned by the POST endpoint. */
+        DocumentReceipt: {
+            /**
+             * Format: uuid
+             * @description Server-assigned UUID.
+             */
+            document_id: string;
+            /**
+             * @description Initial state — always ``RECIBIDO`` for a fresh upload.
+             *
+             *     * `RECIBIDO` - Recibido
+             *     * `PROCESANDO` - Procesando
+             *     * `PROCESADO` - Procesado
+             *     * `PENDIENTE_REVISION` - Pendiente de revisión
+             *     * `PENDIENTE_FIRMA` - Pendiente de firma
+             *     * `FIRMADO` - Firmado
+             *     * `ARCHIVADO` - Archivado
+             *     * `ERROR` - Error
+             *     * `ANULADO` - Anulado
+             */
+            estado: components["schemas"]["DocumentEstado"];
+            /** @description Echoed from the request payload. */
+            numero_origen: string;
+            /** @description Relative URL to GET the full Document detail. */
+            tracking_url: string;
+            /**
+             * Format: date-time
+             * @description UTC timestamp of the insert.
+             */
+            creado_en: string;
+        };
+        /**
+         * @description * `ALBARAN_RECEPCION` - Albarán de recepción
+         *     * `ALBARAN_ENTREGA` - Albarán de entrega
+         *     * `OTRO` - Otro
+         * @enum {string}
+         */
+        DocumentTipo: "ALBARAN_RECEPCION" | "ALBARAN_ENTREGA" | "OTRO";
+        /** @description The actual PDF bytes (or image) the ERP is uploading. */
+        DocumentoBlobRequest: {
+            /** @description Document bytes encoded as base64 (decoded server-side). */
+            contenido_base64: string;
+            /** @description SHA-256 of the *decoded* bytes — the server re-checks this. */
+            hash_sha256: string;
+            /**
+             * @description Declared MIME (advisory). The server enforces the real MIME via libmagic; mismatches are logged but the observed value wins.
+             * @default application/pdf
+             */
+            mime_type: string;
+        };
+        /** @description Optional positioning hint for the visible signature image on the PDF. */
+        FirmaConfigRequest: {
+            /**
+             * @description 1-based page number where the signature should land.
+             * @default 1
+             */
+            posicion_pagina: number;
+            /**
+             * @description X coordinate (PDF points, from bottom-left).
+             * @default 400
+             */
+            x: number;
+            /**
+             * @description Y coordinate (PDF points, from bottom-left).
+             * @default 80
+             */
+            y: number;
+            /**
+             * @description Signature modality — drives the tablet UI.
+             *
+             *     * `BIOMETRICA` - Biométrica
+             *     * `SIMPLE` - Simple
+             *     * `OTP` - OTP
+             * @default BIOMETRICA
+             */
+            modalidad: components["schemas"]["SignatureModalidad"];
+        };
+        /** @description Email/password payload posted to ``POST /api/v1/auth/login``. */
+        LoginRequest: {
+            /**
+             * Format: email
+             * @description Email of the WDock user (case-insensitive).
+             */
+            email: string;
+            /** @description User password (never echoed back; do not log). */
+            password: string;
+        };
+        /** @description Successful response shape of ``POST /api/v1/auth/login``. */
+        LoginResponse: {
+            /** @description Short-lived access JWT (1h). */
+            access: string;
+            /** @description Refresh JWT (7d). Rotates on /auth/refresh. */
             refresh: string;
+            /** @description The authenticated user payload. */
+            user: components["schemas"]["Me"];
+        };
+        /** @description Body of ``POST /api/v1/auth/logout`` — the refresh token to blacklist. */
+        LogoutRequest: {
+            /** @description Refresh JWT obtained from ``/auth/login`` or ``/auth/refresh``. */
+            refresh: string;
+        };
+        /** @description The authenticated user payload returned by ``GET /api/v1/auth/me``. */
+        Me: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string;
+            /**
+             * @description Tenant-wide role for the current user.
+             *
+             *     * `ADMIN` - Administrador
+             *     * `OPERADOR` - Operador
+             *     * `INTEGRACION_ERP` - Integración ERP
+             *     * `AUDITOR` - Auditor
+             *     * `SOLO_LECTURA` - Sólo lectura
+             */
+            rol: components["schemas"]["AuthRole"];
+            /** @description Logical-active flag (separate from is_active). */
+            activo: boolean;
+            /** @description Django staff flag — required for /admin access. */
+            is_staff: boolean;
+            /**
+             * Format: uuid
+             * @description UUID of the tenant the user belongs to.
+             */
+            readonly tenant_id: string;
+            /** @description Human-readable tenant name (cached at login). */
+            readonly tenant_nombre: string | null;
+            /**
+             * Format: date-time
+             * @description Last successful login (UTC). null if never logged in.
+             */
+            ultimo_login: string | null;
+        };
+        PaginatedDocumentList: {
+            /** @description Total elements across all pages. */
+            count: number;
+            /**
+             * Format: uri
+             * @description Next-page URL (null when last page).
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @description Previous-page URL (null when first page).
+             */
+            previous: string | null;
+            results: components["schemas"]["DocumentOutput"][];
+        };
+        PaginatedWebhookDeliveryList: {
+            /** @description Total elements across all pages. */
+            count: number;
+            /**
+             * Format: uri
+             * @description Next-page URL (null when last page).
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @description Previous-page URL (null when first page).
+             */
+            previous: string | null;
+            results: components["schemas"]["WebhookDelivery"][];
+        };
+        /**
+         * @description RFC 7807 Problem Details envelope used by every error response.
+         *
+         *     The actual ``Response`` is built by :func:`apps.documents.errors.problem_response`.
+         */
+        ProblemDetail: {
+            /** @description URI identifier of the problem type (e.g. https://wdock.local/problems/hash-mismatch). */
+            type: string;
+            /** @description Short human-readable title. */
+            title: string;
+            /** @description HTTP status code. */
+            status: number;
+            /** @description Concrete description of this occurrence. */
+            detail: string;
+            /** @description Field-level validation errors (only present when the problem is a schema validation failure). */
+            errors?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Subset of session+document data exposed to the unauthenticated tablet UI. */
+        PublicSession: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly token: string;
+            readonly modalidad: components["schemas"]["SignatureModalidad"];
+            readonly estado: components["schemas"]["SignatureEstado"];
+            readonly firmante_nombre: string;
+            /** Format: date-time */
+            readonly expira_en: string;
+            /** @description Presigned MinIO URL (5 min TTL) the tablet uses to render the PDF. */
+            readonly documento_pdf_url: string | null;
+            /** @description SHA-256 the tablet must echo back on POST /sign. */
+            readonly hash_documento_esperado: string;
+            /** @description Friendly file name based on the document's numero_origen. */
+            readonly nombre_fichero: string;
+        };
+        /** @description Body of ``POST /api/v1/auth/refresh``. */
+        RefreshRequest: {
+            /** @description Refresh JWT to exchange for a new access token. */
+            refresh: string;
+        };
+        /** @description Successful response shape of ``POST /api/v1/auth/refresh``. */
+        RefreshResponse: {
+            /** @description New access JWT. */
+            access: string;
+            /** @description Rotated refresh JWT (only when ``ROTATE_REFRESH_TOKENS=True``). Replace the previous refresh in the client store. */
+            refresh?: string;
+        };
+        /** @description Body of ``POST /signature/sessions/{token}/reject`` (razon required). */
+        RejectRequest: {
+            /** @description Free-text reason logged in the audit trail under ``signature.rejected``. Must not be empty — leaked-token mitigation. */
+            razon: string;
+        };
+        /** @description Body of ``POST /api/v1/documents/{id}/signature/sessions``. */
+        SessionCreateRequest: {
+            /**
+             * @description Modality the tablet UI should drive.
+             *
+             *     * `BIOMETRICA` - Biométrica
+             *     * `SIMPLE` - Simple
+             *     * `OTP` - OTP
+             * @default BIOMETRICA
+             */
+            modalidad: components["schemas"]["SignatureModalidad"];
+            /** @description Pre-fill for the signer's full name (optional). */
+            firmante_nombre?: string;
+            /** @description Pre-fill for the signer's national ID (optional). */
+            firmante_dni?: string;
+            /**
+             * @description Session TTL — defaults to 4h, capped at 72h.
+             * @default 240
+             */
+            ttl_minutes: number;
+        };
+        /** @description Response of the create-session endpoint. */
+        SessionCreateResponse: {
+            /**
+             * Format: uuid
+             * @description Server-assigned UUID of the new session.
+             */
+            session_id: string;
+            /**
+             * Format: uuid
+             * @description UUIDv4 access token; embed in the signing URL handed to the tablet.
+             */
+            token: string;
+            /**
+             * Format: uri
+             * @description Tablet-facing URL combining ``SIGNATURE_FRONTEND_BASE_URL`` and the token.
+             */
+            signing_url: string;
+            /**
+             * Format: date-time
+             * @description UTC timestamp after which the session is gone.
+             */
+            expira_en: string;
+            /**
+             * @description Initial state — always ``PENDIENTE``.
+             *
+             *     * `PENDIENTE` - Pendiente
+             *     * `EN_FIRMA` - En firma
+             *     * `FIRMADA` - Firmada
+             *     * `EXPIRADA` - Expirada
+             *     * `CANCELADA` - Cancelada
+             *     * `ERROR` - Error
+             */
+            estado: components["schemas"]["SignatureEstado"];
+        };
+        /** @description 202 response of ``POST /signature/sessions/{token}/sign``. */
+        SignAcceptedResponse: {
+            /**
+             * Format: uuid
+             * @description Echoed session id.
+             */
+            session_id: string;
+            /**
+             * @description Public-facing label while the orchestrator builds the signed PDF. The DB-level state is EN_FIRMA → FIRMADA / ERROR.
+             *
+             *     * `PROCESANDO` - PROCESANDO
+             */
+            estado: components["schemas"]["SignAcceptedResponseEstadoEnum"];
+        };
+        /**
+         * @description * `PROCESANDO` - PROCESANDO
+         * @enum {string}
+         */
+        SignAcceptedResponseEstadoEnum: "PROCESANDO";
+        /** @description Payload from the tablet: trazado + datos contextuales para auditoría. */
+        SignSubmitRequest: {
+            /** @description SHA-256 of the displayed PDF (must match Document.hash_sha256). */
+            hash_documento: string;
+            /** @description Ordered list of sampled points. Validations live in apps.signature.services.biometric_validation. */
+            trazado: components["schemas"]["TracePointRequest"][];
+            /** @description Optional ``{lat, lng, accuracy_m}`` from the device. Stored alongside the encrypted trace for forensic use. */
+            geolocalizacion?: {
+                [key: string]: unknown;
+            };
+            /**
+             * @description UA string of the signing browser (auto-captured if omitted).
+             * @default
+             */
+            user_agent: string;
+            /**
+             * @description Pseudonymous device fingerprint generated by the tablet UI.
+             * @default
+             */
+            device_id: string;
+        };
+        /**
+         * @description * `PENDIENTE` - Pendiente
+         *     * `EN_FIRMA` - En firma
+         *     * `FIRMADA` - Firmada
+         *     * `EXPIRADA` - Expirada
+         *     * `CANCELADA` - Cancelada
+         *     * `ERROR` - Error
+         * @enum {string}
+         */
+        SignatureEstado: "PENDIENTE" | "EN_FIRMA" | "FIRMADA" | "EXPIRADA" | "CANCELADA" | "ERROR";
+        /**
+         * @description * `BIOMETRICA` - Biométrica
+         *     * `SIMPLE` - Simple
+         *     * `OTP` - OTP
+         * @enum {string}
+         */
+        SignatureModalidad: "BIOMETRICA" | "SIMPLE" | "OTP";
+        /** @description Single sample in a signature trace. */
+        TracePointRequest: {
+            /**
+             * Format: double
+             * @description X coordinate (CSS pixels relative to the canvas).
+             */
+            x: number;
+            /**
+             * Format: double
+             * @description Y coordinate (CSS pixels relative to the canvas).
+             */
+            y: number;
+            /**
+             * Format: double
+             * @description Pen pressure, 0.0–1.0. Defaults to 0.5 when the device has no pressure.
+             * @default 0.5
+             */
+            p: number;
+            /** @description Milliseconds since the start of the trace. */
+            t: number;
+        };
+        /** @description Carrier fields shipped with the document payload (free-form, not a model). */
+        TransportistaRequest: {
+            /** @description Carrier company name. */
+            nombre: string;
+            /** @description Spanish CIF/NIF. */
+            cif?: string;
+        };
+        /** @description One vehicle entry in the inbound document payload. */
+        VehicleInputRequest: {
+            /** @description VIN — exactly 17 alphanumeric chars (ISO 3779). */
+            bastidor: string;
+            /** @description License plate as it appears on the delivery note. */
+            matricula?: string;
+            /** @description Vehicle make. */
+            marca?: string;
+            /** @description Vehicle model. */
+            modelo?: string;
+        };
+        /** @description Read-only vehicle shape included in document responses. */
+        VehicleOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly bastidor: string;
+            readonly matricula: string;
+            readonly marca: string;
+            readonly modelo: string;
+        };
+        /** @description Read-only WebhookDelivery shape exposed to tenant admins. */
+        WebhookDelivery: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description UUID of the ErpIntegration this delivery belongs to.
+             */
+            erp_integration_id: string;
+            readonly evento: string;
+            /**
+             * @description Lifecycle: PENDIENTE / ENVIADO / FALLIDO / DESCARTADO.
+             *
+             *     * `PENDIENTE` - Pendiente
+             *     * `ENVIADO` - Enviado
+             *     * `FALLIDO` - Fallido
+             *     * `DESCARTADO` - Descartado
+             */
+            estado: components["schemas"]["WebhookDeliveryStatus"];
+            /** @description 0-based attempt counter (max 5). */
+            intento: number;
+            /** @description HTTP status returned by the ERP, null if no response. */
+            respuesta_status: number | null;
+            /** @description Response body, truncated to 10 KB. */
+            respuesta_body: string;
+            /**
+             * Format: date-time
+             * @description Next-retry timestamp; null when no retry is scheduled.
+             */
+            siguiente_intento: string | null;
+            /** Format: date-time */
+            readonly creado_en: string;
+            /** Format: date-time */
+            readonly actualizado_en: string;
+        };
+        /**
+         * @description * `PENDIENTE` - Pendiente
+         *     * `ENVIADO` - Enviado
+         *     * `FALLIDO` - Fallido
+         *     * `DESCARTADO` - Descartado
+         * @enum {string}
+         */
+        WebhookDeliveryStatus: "PENDIENTE" | "ENVIADO" | "FALLIDO" | "DESCARTADO";
+        OAuthTokenRequest: {
+            /**
+             * @description Always ``client_credentials`` for ERP integrations.
+             * @enum {string}
+             */
+            grant_type: "client_credentials";
+            /** @description Provided by ``manage.py create_erp_integration``. */
+            client_id: string;
+            /** @description Provided ONCE by the provisioning command. Hashed at rest. */
+            client_secret: string;
+            /** @description Space-separated scopes from {documents.read, documents.write, signature.read, webhooks.manage}. Subset of the integration's ``allowed_scopes``. */
+            scope?: string;
+        };
+        OAuthTokenResponse: {
+            /** @description Bearer token, lifetime 1h. */
+            access_token: string;
+            /** @description Lifetime in seconds (3600). */
+            expires_in: number;
+            /** @enum {string} */
+            token_type: "Bearer";
+            /** @description Granted scopes (space-separated). */
+            scope: string;
+        };
+        OAuthTokenError: {
+            error?: string;
+            error_description?: string;
         };
     };
     responses: never;
@@ -304,25 +872,50 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    v1_admin_webhooks_retrieve: {
+    admin_webhooks_list: {
         parameters: {
-            query?: never;
+            query?: {
+                estado?: "DESCARTADO" | "ENVIADO" | "FALLIDO" | "PENDIENTE";
+                evento?: string;
+                /** @description ErpIntegration UUID to scope the listing to. */
+                integracion?: string;
+                page?: number;
+                /** @description Items per page (max 200). */
+                page_size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PaginatedWebhookDeliveryList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_admin_webhooks_retry_create: {
+    admin_webhooks_retry: {
         parameters: {
             query?: never;
             header?: never;
@@ -333,70 +926,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["WebhookDelivery"];
+                };
             };
-        };
-    };
-    v1_auth_login_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
-        };
-    };
-    v1_auth_logout_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
-        };
-    };
-    v1_auth_me_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_auth_refresh_create: {
+    auth_login: {
         parameters: {
             query?: never;
             header?: never;
@@ -405,9 +969,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenRefresh"];
-                "application/x-www-form-urlencoded": components["schemas"]["TokenRefresh"];
-                "multipart/form-data": components["schemas"]["TokenRefresh"];
+                "application/json": components["schemas"]["LoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+                "multipart/form-data": components["schemas"]["LoginRequest"];
             };
         };
         responses: {
@@ -416,12 +980,63 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TokenRefresh"];
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Unknown user or wrong password. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Account locked after too many failed attempts. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
         };
     };
-    v1_documents_retrieve: {
+    auth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogoutRequest"];
+                "multipart/form-data": components["schemas"]["LogoutRequest"];
+            };
+        };
+        responses: {
+            /** @description Token blacklisted; client must drop it. */
+            205: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer access token missing/invalid OR refresh malformed. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_me: {
         parameters: {
             query?: never;
             header?: never;
@@ -430,34 +1045,188 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Bearer access token missing or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_documents_create: {
+    auth_refresh: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RefreshRequest"];
+                "multipart/form-data": components["schemas"]["RefreshRequest"];
+            };
+        };
         responses: {
-            /** @description No response body */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description Refresh token expired, blacklisted, or malformed. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_documents_signature_sessions_create: {
+    documents_list: {
+        parameters: {
+            query?: {
+                /** @description Exact-match VIN to find documents that include that vehicle. */
+                bastidor?: string;
+                /** @description Inclusive lower bound on creado_en (date only). */
+                desde?: string;
+                /** @description Filter by lifecycle state. */
+                estado?: "ANULADO" | "ARCHIVADO" | "ERROR" | "FIRMADO" | "PENDIENTE_FIRMA" | "PENDIENTE_REVISION" | "PROCESADO" | "PROCESANDO" | "RECIBIDO";
+                /** @description Inclusive upper bound on creado_en (date only). */
+                hasta?: string;
+                ordering?: "-actualizado_en" | "-creado_en" | "-estado" | "-tipo" | "actualizado_en" | "creado_en" | "estado" | "tipo";
+                page?: number;
+                /** @description Items per page (max 100). */
+                page_size?: number;
+                /** @description Free-text icontains over numero_origen and bastidor. */
+                q?: string;
+                /** @description Filter by document type. */
+                tipo?: "ALBARAN_ENTREGA" | "ALBARAN_RECEPCION" | "OTRO";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDocumentList"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Opaque per-request key the ERP supplies to make ``POST /documents`` safe to retry. Same key + same payload → cached 202 replay (24h). */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["DocumentCreateRequest"];
+                "multipart/form-data": components["schemas"]["DocumentCreateRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentReceipt"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    signature_session_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -466,18 +1235,49 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["SessionCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SessionCreateRequest"];
+                "multipart/form-data": components["schemas"]["SessionCreateRequest"];
+            };
+        };
         responses: {
-            /** @description No response body */
-            200: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SessionCreateResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_documents_retrieve_2: {
+    documents_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -488,16 +1288,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DocumentOutput"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_documents_destroy: {
+    documents_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -508,16 +1333,48 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description Document marked ANULADO. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
     };
-    v1_documents_evidencias_retrieve: {
+    documents_evidencias: {
         parameters: {
             query?: never;
             header?: never;
@@ -528,16 +1385,50 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
+            /** @description ZIP bundle (Content-Type: application/zip). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": string;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_documents_pdf_retrieve: {
+    documents_pdf: {
         parameters: {
             query?: never;
             header?: never;
@@ -548,16 +1439,40 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
-            200: {
+            /** @description Redirect to the presigned PDF URL. */
+            302: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
     };
-    v1_signature_sessions_retrieve: {
+    signature_session_public_detail: {
         parameters: {
             query?: never;
             header?: never;
@@ -568,16 +1483,41 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["PublicSession"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
             };
         };
     };
-    v1_signature_sessions_reject_create: {
+    signature_session_public_reject: {
         parameters: {
             query?: never;
             header?: never;
@@ -586,18 +1526,64 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RejectRequest"];
+                "multipart/form-data": components["schemas"]["RejectRequest"];
+            };
+        };
         responses: {
-            /** @description No response body */
-            200: {
+            /** @description Session marked CANCELADA. */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
     };
-    v1_signature_sessions_sign_create: {
+    signature_session_public_sign: {
         parameters: {
             query?: never;
             header?: never;
@@ -606,14 +1592,111 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignSubmitRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SignSubmitRequest"];
+                "multipart/form-data": components["schemas"]["SignSubmitRequest"];
+            };
+        };
         responses: {
-            /** @description No response body */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignAcceptedResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    oauth_token: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/x-www-form-urlencoded": components["schemas"]["OAuthTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Granted access token. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["OAuthTokenResponse"];
+                };
+            };
+            /** @description invalid_request / invalid_client / invalid_scope. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OAuthTokenError"];
+                };
+            };
+            /** @description invalid_client (wrong client_id/secret). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OAuthTokenError"];
+                };
             };
         };
     };
