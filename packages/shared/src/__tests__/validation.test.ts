@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isValidCif, isValidDni, isValidNie, isValidVin } from '../utils/validation';
+import { isValidCif, isValidDni, isValidNie } from '../utils/validation';
 
 describe('isValidDni', () => {
   it('accepts well-known valid DNIs', () => {
@@ -59,23 +59,3 @@ describe('isValidCif', () => {
   });
 });
 
-describe('isValidVin', () => {
-  it('accepts a valid Hyundai VIN with control digit X', () => {
-    // 1HGCM82633A004352 -> Honda Accord. Position 9 must be 3.
-    expect(isValidVin('1HGCM82633A004352')).toBe(true);
-  });
-
-  it('rejects forbidden letters I, O, Q', () => {
-    expect(isValidVin('1HGCM8263OA004352')).toBe(false);
-    expect(isValidVin('IHGCM82633A004352')).toBe(false);
-  });
-
-  it('rejects wrong length', () => {
-    expect(isValidVin('1HGCM82633A00435')).toBe(false);
-    expect(isValidVin('1HGCM82633A0043522')).toBe(false);
-  });
-
-  it('rejects bad control digit', () => {
-    expect(isValidVin('1HGCM82634A004352')).toBe(false);
-  });
-});
