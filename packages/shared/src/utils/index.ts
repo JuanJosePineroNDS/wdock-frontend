@@ -9,11 +9,9 @@ export {
   isValidDni,
   isValidNie,
   isValidCif,
-  isValidVin,
   dniSchema,
   nieSchema,
   cifSchema,
-  vinSchema,
   emailSchema,
   passwordSchema,
 } from './validation';

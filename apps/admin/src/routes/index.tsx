@@ -26,7 +26,7 @@ function DocumentsPlaceholder() {
   return (
     <div>
       <h1 className="text-xl font-semibold">Documentos</h1>
-      <p className="text-sm text-muted-foreground">Disponible en la Semana 2.</p>
+      <p className="text-sm text-muted-foreground">Funcionalidad en migración a WDock v2.</p>
     </div>
   );
 }
@@ -35,7 +35,7 @@ function UsersPlaceholder() {
   return (
     <div>
       <h1 className="text-xl font-semibold">Usuarios</h1>
-      <p className="text-sm text-muted-foreground">Disponible en la Semana 3.</p>
+      <p className="text-sm text-muted-foreground">Funcionalidad en migración a WDock v2.</p>
     </div>
   );
 }
