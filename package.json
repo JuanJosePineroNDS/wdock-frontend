@@ -10,7 +10,6 @@
   },
   "scripts": {
     "dev:admin": "pnpm --filter @wdock/admin dev",
-    "dev:tablet": "pnpm --filter @wdock/tablet dev",
     "build": "pnpm -r build",
     "build:api-client": "pnpm --filter @wdock/api-client build",
     "test": "pnpm -r test",
