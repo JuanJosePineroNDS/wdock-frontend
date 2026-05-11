@@ -49,10 +49,5 @@ Desktop.ini
 *.tmp
 .cache/
 
-# PWA generated
-apps/*/dev-dist/
-apps/*/public/sw.js
-apps/*/public/workbox-*.js
-
 # Note: archivos generados en packages/api-client/src/generated/ SI se commitean
 # para que el repo sea utilizable sin tener el backend corriendo.
