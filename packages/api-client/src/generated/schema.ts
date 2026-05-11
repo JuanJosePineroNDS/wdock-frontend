@@ -13,7 +13,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["v1_auth_login_create"];
+        /**
+         * Email/password login
+         * @description Validates the user credentials and returns a JWT access + refresh pair plus the authenticated user payload. After 5 consecutive failures the account is locked for 15 minutes (HTTP 423).
+         */
+        post: operations["auth_login"];
         delete?: never;
         options?: never;
         head?: never;
@@ -29,7 +33,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["v1_auth_logout_create"];
+        /**
+         * Blacklist the supplied refresh token
+         * @description Revokes the refresh JWT so it cannot be exchanged again. The associated access JWT is short-lived and will simply expire.
+         */
+        post: operations["auth_logout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -43,7 +51,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["v1_auth_me_retrieve"];
+        /**
+         * Return the authenticated user's profile
+         * @description Reads ``request.user`` and serialises the public profile.
+         */
+        get: operations["auth_me"];
         put?: never;
         post?: never;
         delete?: never;
@@ -62,10 +74,108 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Takes a refresh type JSON web token and returns an access type JSON web
-         *     token if the refresh token is valid.
+         * Exchange a refresh token for a new access token
+         * @description Standard Simple JWT refresh endpoint. With ``ROTATE_REFRESH_TOKENS=True`` the refresh JWT is also rotated, so replace it in the client storage.
          */
-        post: operations["v1_auth_refresh_create"];
+        post: operations["auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List documents for the calling tenant
+         * @description Paginated list with date filters and ordering; tenant-scoped.
+         *
+         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        get: operations["documents_list"];
+        put?: never;
+        /**
+         * Upload a document (PDF / image) for processing
+         * @description Accepts a base64-encoded document up to 25 MB, validates MIME via libmagic and the SHA-256 hash, persists it on MinIO and creates the Document row. Idempotency-Key replays the cached 202 for 24 h when the same key+payload arrives twice.
+         *
+         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        post: operations["documents_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieve one document by id
+         * @description Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        get: operations["documents_retrieve"];
+        put?: never;
+        post?: never;
+        /**
+         * Hard-delete a document
+         * @description Removes the Document row (MinIO objects are left to be reaped by a janitor). The deletion is captured in the audit log under ``document.cancelled``.
+         *
+         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        delete: operations["documents_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/evidencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download the evidence ZIP bundle
+         * @description Streams an ``application/zip`` containing metadata.json, audit_log.json and the signed PDF when available. Returns 409 until the document has a signed copy.
+         *
+         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        get: operations["documents_evidencias"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Redirect to the document PDF presigned URL (5 min TTL)
+         * @description Prefers ``s3_key_firmado`` when available, falls back to ``s3_key_original``. Always returns 302 with a presigned MinIO URL in ``Location``.
+         *
+         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         */
+        get: operations["documents_pdf"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -76,9 +186,162 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        TokenRefresh: {
-            readonly access: string;
+        /**
+         * @description * `ADMIN` - Administrador
+         *     * `OPERADOR` - Operador
+         *     * `INTEGRACION_ERP` - Integración ERP
+         *     * `AUDITOR` - Auditor
+         *     * `SOLO_LECTURA` - Sólo lectura
+         * @enum {string}
+         */
+        AuthRole: "ADMIN" | "OPERADOR" | "INTEGRACION_ERP" | "AUDITOR" | "SOLO_LECTURA";
+        /** @description Body of ``POST /api/v1/documents``. */
+        DocumentCreateRequest: {
+            documento: components["schemas"]["DocumentoBlobRequest"];
+        };
+        /** @description Full Document representation returned by retrieve and list endpoints. */
+        DocumentOutput: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            readonly s3_key_original: string;
+            readonly hash_sha256_original: string;
+            readonly s3_key_firmado: string | null;
+            readonly hash_sha256_firmado: string | null;
+            readonly size_bytes: number;
+            /** Format: date-time */
+            readonly creado_en: string;
+        };
+        /** @description Compact 202 response shape returned by the POST endpoint. */
+        DocumentReceipt: {
+            /**
+             * Format: uuid
+             * @description Server-assigned UUID.
+             */
+            document_id: string;
+            /** @description Relative URL to GET the full Document detail. */
+            tracking_url: string;
+            /**
+             * Format: date-time
+             * @description UTC timestamp of the insert.
+             */
+            creado_en: string;
+        };
+        /** @description The actual PDF bytes the caller is uploading. */
+        DocumentoBlobRequest: {
+            /** @description Document bytes encoded as base64 (decoded server-side). */
+            contenido_base64: string;
+            /** @description SHA-256 of the *decoded* bytes — the server re-checks this. */
+            hash_sha256: string;
+            /**
+             * @description Declared MIME (advisory). The server enforces the real MIME via libmagic; mismatches are logged but the observed value wins.
+             * @default application/pdf
+             */
+            mime_type: string;
+        };
+        /** @description Email/password payload posted to ``POST /api/v1/auth/login``. */
+        LoginRequest: {
+            /**
+             * Format: email
+             * @description Email of the WDock user (case-insensitive).
+             */
+            email: string;
+            /** @description User password (never echoed back; do not log). */
+            password: string;
+        };
+        /** @description Successful response shape of ``POST /api/v1/auth/login``. */
+        LoginResponse: {
+            /** @description Short-lived access JWT (1h). */
+            access: string;
+            /** @description Refresh JWT (7d). Rotates on /auth/refresh. */
             refresh: string;
+            /** @description The authenticated user payload. */
+            user: components["schemas"]["Me"];
+        };
+        /** @description Body of ``POST /api/v1/auth/logout`` — the refresh token to blacklist. */
+        LogoutRequest: {
+            /** @description Refresh JWT obtained from ``/auth/login`` or ``/auth/refresh``. */
+            refresh: string;
+        };
+        /** @description The authenticated user payload returned by ``GET /api/v1/auth/me``. */
+        Me: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string;
+            /**
+             * @description Tenant-wide role for the current user.
+             *
+             *     * `ADMIN` - Administrador
+             *     * `OPERADOR` - Operador
+             *     * `INTEGRACION_ERP` - Integración ERP
+             *     * `AUDITOR` - Auditor
+             *     * `SOLO_LECTURA` - Sólo lectura
+             */
+            rol: components["schemas"]["AuthRole"];
+            /** @description Logical-active flag (separate from is_active). */
+            activo: boolean;
+            /** @description Django staff flag — required for /admin access. */
+            is_staff: boolean;
+            /**
+             * Format: uuid
+             * @description UUID of the tenant the user belongs to.
+             */
+            readonly tenant_id: string;
+            /** @description Human-readable tenant name (cached at login). */
+            readonly tenant_nombre: string | null;
+            /**
+             * Format: date-time
+             * @description Last successful login (UTC). null if never logged in.
+             */
+            ultimo_login: string | null;
+        };
+        PaginatedDocumentList: {
+            /** @description Total elements across all pages. */
+            count: number;
+            /**
+             * Format: uri
+             * @description Next-page URL (null when last page).
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @description Previous-page URL (null when first page).
+             */
+            previous: string | null;
+            results: components["schemas"]["DocumentOutput"][];
+        };
+        /**
+         * @description RFC 7807 Problem Details envelope used by every error response.
+         *
+         *     The actual ``Response`` is built by :func:`apps.documents.errors.problem_response`.
+         */
+        ProblemDetail: {
+            /** @description URI identifier of the problem type (e.g. https://wdock.local/problems/hash-mismatch). */
+            type: string;
+            /** @description Short human-readable title. */
+            title: string;
+            /** @description HTTP status code. */
+            status: number;
+            /** @description Concrete description of this occurrence. */
+            detail: string;
+            /** @description Field-level validation errors (only present when the problem is a schema validation failure). */
+            errors?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description Body of ``POST /api/v1/auth/refresh``. */
+        RefreshRequest: {
+            /** @description Refresh JWT to exchange for a new access token. */
+            refresh: string;
+        };
+        /** @description Successful response shape of ``POST /api/v1/auth/refresh``. */
+        RefreshResponse: {
+            /** @description New access JWT. */
+            access: string;
+            /** @description Rotated refresh JWT (only when ``ROTATE_REFRESH_TOKENS=True``). Replace the previous refresh in the client store. */
+            refresh?: string;
         };
     };
     responses: never;
@@ -89,61 +352,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    v1_auth_login_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_auth_logout_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_auth_me_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_auth_refresh_create: {
+    auth_login: {
         parameters: {
             query?: never;
             header?: never;
@@ -152,9 +361,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenRefresh"];
-                "application/x-www-form-urlencoded": components["schemas"]["TokenRefresh"];
-                "multipart/form-data": components["schemas"]["TokenRefresh"];
+                "application/json": components["schemas"]["LoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+                "multipart/form-data": components["schemas"]["LoginRequest"];
             };
         };
         responses: {
@@ -163,7 +372,427 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TokenRefresh"];
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description Unknown user or wrong password. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Account locked after too many failed attempts. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LogoutRequest"];
+                "multipart/form-data": components["schemas"]["LogoutRequest"];
+            };
+        };
+        responses: {
+            /** @description Token blacklisted; client must drop it. */
+            205: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bearer access token missing/invalid OR refresh malformed. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Bearer access token missing or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RefreshRequest"];
+                "multipart/form-data": components["schemas"]["RefreshRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefreshResponse"];
+                };
+            };
+            /** @description Refresh token expired, blacklisted, or malformed. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_list: {
+        parameters: {
+            query?: {
+                /** @description Inclusive lower bound on creado_en (date only). */
+                desde?: string;
+                /** @description Inclusive upper bound on creado_en (date only). */
+                hasta?: string;
+                ordering?: "-creado_en" | "creado_en";
+                page?: number;
+                /** @description Items per page (max 100). */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDocumentList"][];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_create: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Opaque per-request key the caller supplies to make ``POST /documents`` safe to retry. Same key + same payload → cached 202 replay (24h). */
+                "Idempotency-Key"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["DocumentCreateRequest"];
+                "multipart/form-data": components["schemas"]["DocumentCreateRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentReceipt"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOutput"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Document deleted. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_evidencias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ZIP bundle (Content-Type: application/zip). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    documents_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirect to the presigned PDF URL. */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
         };
