@@ -4,6 +4,70 @@
  */
 
 export interface paths {
+    "/api/v1/auth/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invitations_list"];
+        put?: never;
+        post: operations["invitations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invitations/{invitation_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["invitations_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invitations/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invitations_detail_public"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/invitations/{token}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["invitations_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -13,10 +77,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Email/password login
-         * @description Validates the user credentials and returns a JWT access + refresh pair plus the authenticated user payload. After 5 consecutive failures the account is locked for 15 minutes (HTTP 423).
-         */
+        /** Email/password login */
         post: operations["auth_login"];
         delete?: never;
         options?: never;
@@ -33,10 +94,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Blacklist the supplied refresh token
-         * @description Revokes the refresh JWT so it cannot be exchanged again. The associated access JWT is short-lived and will simply expire.
-         */
         post: operations["auth_logout"];
         delete?: never;
         options?: never;
@@ -51,10 +108,6 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Return the authenticated user's profile
-         * @description Reads ``request.user`` and serialises the public profile.
-         */
         get: operations["auth_me"];
         put?: never;
         post?: never;
@@ -74,8 +127,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Exchange a refresh token for a new access token
-         * @description Standard Simple JWT refresh endpoint. With ``ROTATE_REFRESH_TOKENS=True`` the refresh JWT is also rotated, so replace it in the client storage.
+         * @description Takes a refresh type JSON web token and returns an access type JSON web
+         *     token if the refresh token is valid.
          */
         post: operations["auth_refresh"];
         delete?: never;
@@ -84,7 +137,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents": {
+    "/api/v1/auth/register/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Public registration (only when REGISTRATION_MODE=PUBLIC) */
+        post: operations["auth_register_public"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/": {
         parameters: {
             query?: never;
             header?: never;
@@ -92,18 +162,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List documents for the calling tenant
-         * @description Paginated list with date filters and ordering; tenant-scoped.
-         *
-         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         * List documents in the calling tenant
+         * @description Generic file upload feature scoped to the calling user's tenant.
          */
         get: operations["documents_list"];
         put?: never;
         /**
-         * Upload a document (PDF / image) for processing
-         * @description Accepts a base64-encoded document up to 25 MB, validates MIME via libmagic and the SHA-256 hash, persists it on MinIO and creates the Document row. Idempotency-Key replays the cached 202 for 24 h when the same key+payload arrives twice.
-         *
-         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         * Upload a file
+         * @description Generic file upload feature scoped to the calling user's tenant.
          */
         post: operations["documents_create"];
         delete?: never;
@@ -119,26 +185,18 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Retrieve one document by id
-         * @description Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
-         */
+        /** @description Generic file upload feature scoped to the calling user's tenant. */
         get: operations["documents_retrieve"];
         put?: never;
         post?: never;
-        /**
-         * Hard-delete a document
-         * @description Removes the Document row (MinIO objects are left to be reaped by a janitor). The deletion is captured in the audit log under ``document.cancelled``.
-         *
-         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
-         */
+        /** @description Generic file upload feature scoped to the calling user's tenant. */
         delete: operations["documents_destroy"];
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents/{id}/evidencias": {
+    "/api/v1/documents/{id}/download": {
         parameters: {
             query?: never;
             header?: never;
@@ -146,12 +204,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Download the evidence ZIP bundle
-         * @description Streams an ``application/zip`` containing metadata.json, audit_log.json and the signed PDF when available. Returns 409 until the document has a signed copy.
-         *
-         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
+         * Redirect to a presigned download URL (5 min TTL)
+         * @description Generic file upload feature scoped to the calling user's tenant.
          */
-        get: operations["documents_evidencias"];
+        get: operations["documents_download"];
         put?: never;
         post?: never;
         delete?: never;
@@ -160,26 +216,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents/{id}/pdf": {
+    "/api/v1/notes/": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Redirect to the document PDF presigned URL (5 min TTL)
-         * @description Prefers ``s3_key_firmado`` when available, falls back to ``s3_key_original``. Always returns 302 with a presigned MinIO URL in ``Location``.
-         *
-         *     Authenticate with a user JWT. Roles ADMIN/OPERADOR may write; AUDITOR/SOLO_LECTURA may read.
-         */
-        get: operations["documents_pdf"];
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        get: operations["notes_list"];
         put?: never;
-        post?: never;
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        post: operations["notes_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notes/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        get: operations["notes_retrieve"];
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        put: operations["notes_update"];
+        post?: never;
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        delete: operations["notes_destroy"];
+        options?: never;
+        head?: never;
+        /** @description CRUD endpoints for notes. Each user only sees their own notes within their tenant. */
+        patch: operations["notes_partial_update"];
         trace?: never;
     };
 }
@@ -187,138 +259,164 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * @description * `ADMIN` - Administrador
-         *     * `OPERADOR` - Operador
-         *     * `INTEGRACION_ERP` - Integración ERP
+         * @description * `SUPERADMIN` - Superadmin (global)
+         *     * `ADMIN` - Administrator
+         *     * `OPERATOR` - Operator
          *     * `AUDITOR` - Auditor
-         *     * `SOLO_LECTURA` - Sólo lectura
+         *     * `READONLY` - Read-only
          * @enum {string}
          */
-        AuthRole: "ADMIN" | "OPERADOR" | "INTEGRACION_ERP" | "AUDITOR" | "SOLO_LECTURA";
-        /** @description Body of ``POST /api/v1/documents``. */
-        DocumentCreateRequest: {
-            documento: components["schemas"]["DocumentoBlobRequest"];
-        };
-        /** @description Full Document representation returned by retrieve and list endpoints. */
-        DocumentOutput: {
+        AuthRole: "SUPERADMIN" | "ADMIN" | "OPERATOR" | "AUDITOR" | "READONLY";
+        /** @description Output shape for retrieve/list. */
+        Document: {
             /** Format: uuid */
             readonly id: string;
             /** Format: uuid */
             readonly tenant: string;
-            readonly s3_key_original: string;
-            readonly hash_sha256_original: string;
-            readonly s3_key_firmado: string | null;
-            readonly hash_sha256_firmado: string | null;
+            /** Format: uuid */
+            readonly uploaded_by: string | null;
+            /** @description S3 object key. */
+            readonly s3_key: string;
+            /** @description Original filename. */
+            readonly filename: string;
+            readonly content_type: string;
+            /** @description SHA-256 of the file content. */
+            readonly hash_sha256: string;
             readonly size_bytes: number;
             /** Format: date-time */
-            readonly creado_en: string;
+            readonly created_at: string;
+            readonly download_url: string;
         };
-        /** @description Compact 202 response shape returned by the POST endpoint. */
-        DocumentReceipt: {
-            /**
-             * Format: uuid
-             * @description Server-assigned UUID.
-             */
-            document_id: string;
-            /** @description Relative URL to GET the full Document detail. */
-            tracking_url: string;
-            /**
-             * Format: date-time
-             * @description UTC timestamp of the insert.
-             */
-            creado_en: string;
+        /** @description Body of ``POST /api/v1/documents/`` (multipart/form-data). */
+        DocumentUploadRequest: {
+            /** Format: binary */
+            file: string;
         };
-        /** @description The actual PDF bytes the caller is uploading. */
-        DocumentoBlobRequest: {
-            /** @description Document bytes encoded as base64 (decoded server-side). */
-            contenido_base64: string;
-            /** @description SHA-256 of the *decoded* bytes — the server re-checks this. */
-            hash_sha256: string;
-            /**
-             * @description Declared MIME (advisory). The server enforces the real MIME via libmagic; mismatches are logged but the observed value wins.
-             * @default application/pdf
-             */
-            mime_type: string;
+        /**
+         * @description Read serializer returned by the admin invitation endpoints.
+         *
+         *     Includes the raw ``token`` because admins need to share it with the
+         *     invitee out-of-band (the template does not ship email integration).
+         */
+        Invitation: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            readonly tenant_name: string;
+            /** Format: email */
+            readonly email: string;
+            readonly role: components["schemas"]["AuthRole"];
+            /** Format: uuid */
+            readonly token: string;
+            /** @default PENDING */
+            readonly status: components["schemas"]["StatusEnum"];
+            /** Format: uuid */
+            readonly invited_by: string;
+            readonly invited_by_email: string;
+            /** Format: date-time */
+            readonly expires_at: string;
+            /** Format: date-time */
+            readonly accepted_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Body of ``POST /api/v1/auth/invitations/{token}/accept``. */
+        InvitationAcceptRequest: {
+            password: string;
+        };
+        /** @description Body of ``POST /api/v1/auth/invitations``. */
+        InvitationCreateRequest: {
+            /** Format: email */
+            email: string;
+            role: components["schemas"]["AuthRole"];
+            /** Format: uuid */
+            tenant_id?: string;
+        };
+        /** @description Public view of an invitation (no sensitive fields). */
+        InvitationPublic: {
+            /** Format: email */
+            readonly email: string;
+            readonly role: components["schemas"]["AuthRole"];
+            readonly tenant_name: string;
+            /** Format: date-time */
+            readonly expires_at: string;
+            readonly status: components["schemas"]["StatusEnum"];
         };
         /** @description Email/password payload posted to ``POST /api/v1/auth/login``. */
         LoginRequest: {
             /**
              * Format: email
-             * @description Email of the WDock user (case-insensitive).
+             * @description User email (case-insensitive).
              */
             email: string;
-            /** @description User password (never echoed back; do not log). */
+            /** @description User password. */
             password: string;
         };
-        /** @description Successful response shape of ``POST /api/v1/auth/login``. */
         LoginResponse: {
-            /** @description Short-lived access JWT (1h). */
             access: string;
-            /** @description Refresh JWT (7d). Rotates on /auth/refresh. */
             refresh: string;
-            /** @description The authenticated user payload. */
             user: components["schemas"]["Me"];
         };
         /** @description Body of ``POST /api/v1/auth/logout`` — the refresh token to blacklist. */
         LogoutRequest: {
-            /** @description Refresh JWT obtained from ``/auth/login`` or ``/auth/refresh``. */
+            /** @description Refresh JWT to blacklist. */
             refresh: string;
         };
-        /** @description The authenticated user payload returned by ``GET /api/v1/auth/me``. */
+        /** @description Authenticated user payload returned by ``GET /api/v1/auth/me``. */
         Me: {
             /** Format: uuid */
             readonly id: string;
             /** Format: email */
             readonly email: string;
-            /**
-             * @description Tenant-wide role for the current user.
-             *
-             *     * `ADMIN` - Administrador
-             *     * `OPERADOR` - Operador
-             *     * `INTEGRACION_ERP` - Integración ERP
-             *     * `AUDITOR` - Auditor
-             *     * `SOLO_LECTURA` - Sólo lectura
-             */
-            rol: components["schemas"]["AuthRole"];
-            /** @description Logical-active flag (separate from is_active). */
-            activo: boolean;
-            /** @description Django staff flag — required for /admin access. */
-            is_staff: boolean;
-            /**
-             * Format: uuid
-             * @description UUID of the tenant the user belongs to.
-             */
+            role: components["schemas"]["AuthRole"];
+            readonly is_active: boolean;
+            readonly is_staff: boolean;
+            /** Format: uuid */
             readonly tenant_id: string;
-            /** @description Human-readable tenant name (cached at login). */
-            readonly tenant_nombre: string | null;
-            /**
-             * Format: date-time
-             * @description Last successful login (UTC). null if never logged in.
-             */
-            ultimo_login: string | null;
+            readonly tenant_name: string | null;
+            /** Format: date-time */
+            readonly last_login_at: string | null;
         };
-        PaginatedDocumentList: {
-            /** @description Total elements across all pages. */
+        Note: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            body?: string;
+            pinned?: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        NoteRequest: {
+            title: string;
+            body?: string;
+            pinned?: boolean;
+        };
+        PaginatedNoteList: {
+            /** @example 123 */
             count: number;
             /**
              * Format: uri
-             * @description Next-page URL (null when last page).
+             * @example http://api.example.org/accounts/?page=4
              */
-            next: string | null;
+            next?: string | null;
             /**
              * Format: uri
-             * @description Previous-page URL (null when first page).
+             * @example http://api.example.org/accounts/?page=2
              */
-            previous: string | null;
-            results: components["schemas"]["DocumentOutput"][];
+            previous?: string | null;
+            results: components["schemas"]["Note"][];
         };
-        /**
-         * @description RFC 7807 Problem Details envelope used by every error response.
-         *
-         *     The actual ``Response`` is built by :func:`apps.documents.errors.problem_response`.
-         */
+        PatchedNoteRequest: {
+            title?: string;
+            body?: string;
+            pinned?: boolean;
+        };
+        /** @description RFC 7807 Problem Details envelope used by every error response. */
         ProblemDetail: {
-            /** @description URI identifier of the problem type (e.g. https://wdock.local/problems/hash-mismatch). */
+            /** @description URI identifier of the problem type. */
             type: string;
             /** @description Short human-readable title. */
             title: string;
@@ -331,18 +429,34 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** @description Body of ``POST /api/v1/auth/refresh``. */
+        /**
+         * @description Body of ``POST /api/v1/auth/register/public``.
+         *
+         *     Only accepted when ``REGISTRATION_MODE=PUBLIC``. Optionally accepts a
+         *     ``tenant_cif`` to attach the new user to a specific tenant; defaults to
+         *     the bootstrap default tenant.
+         */
+        PublicRegistrationRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+            tenant_cif?: string;
+        };
         RefreshRequest: {
-            /** @description Refresh JWT to exchange for a new access token. */
             refresh: string;
         };
-        /** @description Successful response shape of ``POST /api/v1/auth/refresh``. */
         RefreshResponse: {
-            /** @description New access JWT. */
             access: string;
-            /** @description Rotated refresh JWT (only when ``ROTATE_REFRESH_TOKENS=True``). Replace the previous refresh in the client store. */
             refresh?: string;
         };
+        /**
+         * @description * `PENDING` - Pending
+         *     * `ACCEPTED` - Accepted
+         *     * `EXPIRED` - Expired
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        StatusEnum: "PENDING" | "ACCEPTED" | "EXPIRED" | "CANCELLED";
     };
     responses: never;
     parameters: never;
@@ -352,6 +466,159 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    invitations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invitation"][];
+                };
+            };
+        };
+    };
+    invitations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["InvitationCreateRequest"];
+                "multipart/form-data": components["schemas"]["InvitationCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invitation"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    invitations_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invitation"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    invitations_detail_public: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationPublic"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    invitations_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvitationAcceptRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["InvitationAcceptRequest"];
+                "multipart/form-data": components["schemas"]["InvitationAcceptRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
     auth_login: {
         parameters: {
             query?: never;
@@ -375,7 +642,6 @@ export interface operations {
                     "application/json": components["schemas"]["LoginResponse"];
                 };
             };
-            /** @description Unknown user or wrong password. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -384,7 +650,6 @@ export interface operations {
                     "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
-            /** @description Account locked after too many failed attempts. */
             423: {
                 headers: {
                     [name: string]: unknown;
@@ -410,14 +675,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Token blacklisted; client must drop it. */
+            /** @description Token blacklisted. */
             205: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bearer access token missing/invalid OR refresh malformed. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -445,7 +709,6 @@ export interface operations {
                     "application/json": components["schemas"]["Me"];
                 };
             };
-            /** @description Bearer access token missing or expired. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -479,7 +742,6 @@ export interface operations {
                     "application/json": components["schemas"]["RefreshResponse"];
                 };
             };
-            /** @description Refresh token expired, blacklisted, or malformed. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -490,90 +752,27 @@ export interface operations {
             };
         };
     };
-    documents_list: {
-        parameters: {
-            query?: {
-                /** @description Inclusive lower bound on creado_en (date only). */
-                desde?: string;
-                /** @description Inclusive upper bound on creado_en (date only). */
-                hasta?: string;
-                ordering?: "-creado_en" | "creado_en";
-                page?: number;
-                /** @description Items per page (max 100). */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedDocumentList"][];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    documents_create: {
+    auth_register_public: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Opaque per-request key the caller supplies to make ``POST /documents`` safe to retry. Same key + same payload → cached 202 replay (24h). */
-                "Idempotency-Key"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DocumentCreateRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["DocumentCreateRequest"];
-                "multipart/form-data": components["schemas"]["DocumentCreateRequest"];
+                "application/json": components["schemas"]["PublicRegistrationRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PublicRegistrationRequest"];
+                "multipart/form-data": components["schemas"]["PublicRegistrationRequest"];
             };
         };
         responses: {
-            202: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentReceipt"];
-                };
-            };
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
+                    "application/json": components["schemas"]["LoginResponse"];
                 };
             };
             403: {
@@ -592,7 +791,49 @@ export interface operations {
                     "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
-            413: {
+        };
+    };
+    documents_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"][];
+                };
+            };
+        };
+    };
+    documents_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["DocumentUploadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Document"];
+                };
+            };
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -600,7 +841,7 @@ export interface operations {
                     "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
-            422: {
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -626,23 +867,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["DocumentOutput"];
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
+                    "application/json": components["schemas"]["Document"];
                 };
             };
             404: {
@@ -666,29 +891,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Document deleted. */
+            /** @description Deleted. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -699,7 +908,7 @@ export interface operations {
             };
         };
     };
-    documents_evidencias: {
+    documents_download: {
         parameters: {
             query?: never;
             header?: never;
@@ -710,89 +919,170 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description ZIP bundle (Content-Type: application/zip). */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-        };
-    };
-    documents_pdf: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Redirect to the presigned PDF URL. */
+            /** @description Redirect. */
             302: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    notes_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                pinned?: boolean;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedNoteList"];
+                };
+            };
+        };
+    };
+    notes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoteRequest"];
+                "multipart/form-data": components["schemas"]["NoteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Note"];
+                };
+            };
+        };
+    };
+    notes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this note. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Note"];
+                };
+            };
+        };
+    };
+    notes_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this note. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoteRequest"];
+                "multipart/form-data": components["schemas"]["NoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Note"];
+                };
+            };
+        };
+    };
+    notes_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this note. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    notes_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this note. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedNoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedNoteRequest"];
+                "multipart/form-data": components["schemas"]["PatchedNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Note"];
                 };
             };
         };

@@ -13,12 +13,12 @@ describe('useAuth', () => {
       user: {
         id: 'u',
         email: 'a@b.c',
-        rol: 'ADMIN',
-        activo: true,
+        role: 'ADMIN',
+        is_active: true,
         is_staff: true,
         tenant_id: 't',
-        tenant_nombre: 'Demo',
-        ultimo_login: null,
+        tenant_name: 'Demo',
+        last_login_at: null,
       },
       isAuthenticated: true,
     });

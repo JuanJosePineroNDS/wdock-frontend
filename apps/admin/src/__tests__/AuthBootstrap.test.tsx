@@ -43,12 +43,12 @@ function freshTokens() {
 const fakeUser = {
   id: 'u1',
   email: 'admin@example.com',
-  rol: 'ADMIN' as const,
-  activo: true,
+  role: 'ADMIN' as const,
+  is_active: true,
   is_staff: true,
   tenant_id: 't1',
-  tenant_nombre: 'Default Tenant',
-  ultimo_login: null,
+  tenant_name: 'Default Tenant',
+  last_login_at: null,
 };
 
 function renderBootstrap() {

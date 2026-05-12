@@ -29,11 +29,11 @@ export function DashboardPage() {
                 </div>
                 <div>
                   <span className="text-slate-500">Tenant:</span>{' '}
-                  <span className="font-medium">{user.tenant_nombre}</span>
+                  <span className="font-medium">{user.tenant_name}</span>
                 </div>
                 <div>
                   <span className="text-slate-500">Role:</span>{' '}
-                  <span className="font-medium uppercase">{user.rol}</span>
+                  <span className="font-medium uppercase">{user.role}</span>
                 </div>
               </>
             ) : (
