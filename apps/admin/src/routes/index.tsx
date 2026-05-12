@@ -7,6 +7,8 @@ import { RegisterPage } from './auth/RegisterPage';
 import { AcceptInvitationPage } from './auth/AcceptInvitationPage';
 import { DashboardPage } from './dashboard/DashboardPage';
 import { InvitationsListPage } from './admin/InvitationsListPage';
+import { NotesListPage } from './notes/NotesListPage';
+import { NoteFormPage } from './notes/NoteFormPage';
 
 export function AppRoutes() {
   return (
@@ -17,6 +19,9 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/notes" element={<NotesListPage />} />
+          <Route path="/notes/new" element={<NoteFormPage />} />
+          <Route path="/notes/:id/edit" element={<NoteFormPage />} />
           <Route path="/admin/invitations" element={<InvitationsListPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Route>

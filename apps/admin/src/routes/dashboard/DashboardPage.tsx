@@ -1,8 +1,12 @@
+import { Link } from 'react-router-dom';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNotes } from '@/features/notes/hooks';
 import { useAuthStore } from '@/stores/authStore';
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
+  const notesQuery = useNotes();
 
   return (
     <div className="space-y-6">
@@ -39,6 +43,28 @@ export function DashboardPage() {
             ) : (
               <span className="text-slate-500">No active session.</span>
             )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Notes</CardTitle>
+            <CardDescription>Quick example feature.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {notesQuery.isLoading && <span className="text-slate-500">Loading…</span>}
+            {notesQuery.isError && <span className="text-slate-500">—</span>}
+            {notesQuery.data && (
+              <p>
+                You have{' '}
+                <span className="font-semibold" data-testid="notes-count">
+                  {notesQuery.data.count}
+                </span>{' '}
+                {notesQuery.data.count === 1 ? 'note' : 'notes'}.
+              </p>
+            )}
+            <Link to="/notes" className="text-primary underline-offset-4 hover:underline">
+              Manage notes →
+            </Link>
           </CardContent>
         </Card>
       </div>

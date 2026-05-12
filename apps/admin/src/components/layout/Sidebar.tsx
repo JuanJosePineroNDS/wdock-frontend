@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Mail } from 'lucide-react';
+import { LayoutDashboard, Mail, StickyNote } from 'lucide-react';
 import { cn } from '@app/shared/utils';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -13,6 +13,7 @@ interface NavItem {
 
 const items: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/notes', label: 'Notes', icon: StickyNote },
   { to: '/admin/invitations', label: 'Invitations', icon: Mail, adminOnly: true },
 ];
 
