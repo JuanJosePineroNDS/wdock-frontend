@@ -24,10 +24,23 @@ export interface CreateApiClientOptions {
 
 export type AppApiClient = Client<AppPaths>;
 
-const PUBLIC_PATH_FRAGMENTS = ['/auth/login', '/auth/refresh', '/sign/'];
+const PUBLIC_PATH_FRAGMENTS = [
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/register/public',
+];
+
+const PUBLIC_PATH_REGEXES: readonly RegExp[] = [
+  // GET/POST /api/v1/auth/invitations/{token}[/accept] are public (no auth).
+  // The bare /auth/invitations endpoint (list/create) IS authenticated.
+  /\/auth\/invitations\/[^/]+(?:\/accept)?(?:\?.*)?$/,
+];
 
 function isPublicRequest(url: string): boolean {
-  return PUBLIC_PATH_FRAGMENTS.some((fragment) => url.includes(fragment));
+  if (PUBLIC_PATH_FRAGMENTS.some((fragment) => url.includes(fragment))) {
+    return true;
+  }
+  return PUBLIC_PATH_REGEXES.some((re) => re.test(url));
 }
 
 function defaultLogout(): void {

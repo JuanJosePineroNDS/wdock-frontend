@@ -1,18 +1,33 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, Mail } from 'lucide-react';
 import { cn } from '@app/shared/utils';
 
-const items = [
+import { useAuthStore } from '@/stores/authStore';
+
+interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  adminOnly?: boolean;
+}
+
+const items: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/invitations', label: 'Invitations', icon: Mail, adminOnly: true },
 ];
 
 export function Sidebar() {
+  const role = useAuthStore((state) => state.user?.role);
+  const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN';
+
+  const visibleItems = items.filter((item) => !item.adminOnly || isAdmin);
+
   return (
     <aside className="flex w-56 flex-col border-r border-slate-200 bg-white">
       <div className="px-6 py-5 text-lg font-semibold tracking-tight text-slate-900">App</div>
       <nav className="flex-1 px-3 pb-4">
         <ul className="space-y-1">
-          {items.map(({ to, label, icon: Icon }) => (
+          {visibleItems.map(({ to, label, icon: Icon }) => (
             <li key={to}>
               <NavLink
                 to={to}

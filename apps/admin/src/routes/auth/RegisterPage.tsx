@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { authStorage } from '@app/api-client';
 import { emailSchema, passwordSchema } from '@app/shared/utils';
@@ -11,44 +11,53 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  isInvitationRegistrationEnabled,
-  isPublicRegistrationEnabled,
-} from '@/config/registration';
+import { isPublicRegistrationEnabled } from '@/config/registration';
 import { useApiClient } from '@/hooks/useApiClient';
 import { useAuthStore } from '@/stores/authStore';
 
-const loginFormSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
-});
+const registerFormSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    confirm: z.string(),
+  })
+  .refine((data) => data.password === data.confirm, {
+    message: 'Passwords do not match',
+    path: ['confirm'],
+  });
 
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
-export function LoginPage() {
+export function RegisterPage() {
   const api = useApiClient();
   const navigate = useNavigate();
   const setSession = useAuthStore((state) => state.setSession);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginFormSchema),
-    defaultValues: { email: '', password: '' },
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: { email: '', password: '', confirm: '' },
   });
+
+  if (!isPublicRegistrationEnabled()) {
+    return <Navigate to="/login" replace />;
+  }
 
   const onSubmit = form.handleSubmit(async (values) => {
     setServerError(null);
-    const { data, error, response } = await api.POST('/api/v1/auth/login', {
-      body: values,
+    const { data, error, response } = await api.POST('/api/v1/auth/register/public', {
+      body: { email: values.email, password: values.password },
     });
 
     if (error || !data) {
-      if (response.status === 401) {
-        setServerError('Invalid credentials. Check your email and password.');
+      if (response.status === 403) {
+        setServerError('Public registration is disabled on this server.');
+      } else if (response.status === 409) {
+        setServerError('An account already exists with that email.');
       } else if (response.status >= 500) {
         setServerError('Cannot reach the server. Please try again in a few minutes.');
       } else {
-        setServerError('Sign-in failed. Please review the form and try again.');
+        setServerError('Registration failed. Please review the form and try again.');
       }
       return;
     }
@@ -62,16 +71,14 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign in to App Admin</CardTitle>
-          <CardDescription>
-            Use your account to access the admin panel.
-          </CardDescription>
+          <CardTitle>Create your account</CardTitle>
+          <CardDescription>Sign up to start using App.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4" noValidate>
             {serverError && (
-              <Alert variant="destructive" data-testid="login-error">
-                <AlertTitle>Sign-in failed</AlertTitle>
+              <Alert variant="destructive" data-testid="register-error">
+                <AlertTitle>Registration failed</AlertTitle>
                 <AlertDescription>{serverError}</AlertDescription>
               </Alert>
             )}
@@ -93,7 +100,7 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 aria-invalid={Boolean(form.formState.errors.password)}
                 {...form.register('password')}
               />
@@ -101,25 +108,28 @@ export function LoginPage() {
                 <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
               )}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm">Confirm password</Label>
+              <Input
+                id="confirm"
+                type="password"
+                autoComplete="new-password"
+                aria-invalid={Boolean(form.formState.errors.confirm)}
+                {...form.register('confirm')}
+              />
+              {form.formState.errors.confirm && (
+                <p className="text-sm text-destructive">{form.formState.errors.confirm.message}</p>
+              )}
+            </div>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
+              {form.formState.isSubmitting ? 'Creating account…' : 'Create account'}
             </Button>
-            {isPublicRegistrationEnabled() && (
-              <p className="text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link
-                  to="/register"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Sign up
-                </Link>
-              </p>
-            )}
-            {isInvitationRegistrationEnabled() && (
-              <p className="text-center text-xs text-muted-foreground">
-                Got an invitation? Use the link you received to set your password.
-              </p>
-            )}
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+                Sign in
+              </Link>
+            </p>
           </form>
         </CardContent>
       </Card>
