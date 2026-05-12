@@ -1,17 +1,15 @@
 import { NavLink } from 'react-router-dom';
-import { FileText, LayoutDashboard, Users } from 'lucide-react';
-import { cn } from '@wdock/shared/utils';
+import { LayoutDashboard } from 'lucide-react';
+import { cn } from '@app/shared/utils';
 
 const items = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/documents', label: 'Documentos', icon: FileText },
-  { to: '/users', label: 'Usuarios', icon: Users },
 ];
 
 export function Sidebar() {
   return (
     <aside className="flex w-56 flex-col border-r border-slate-200 bg-white">
-      <div className="px-6 py-5 text-lg font-semibold tracking-tight text-slate-900">WDock</div>
+      <div className="px-6 py-5 text-lg font-semibold tracking-tight text-slate-900">App</div>
       <nav className="flex-1 px-3 pb-4">
         <ul className="space-y-1">
           {items.map(({ to, label, icon: Icon }) => (

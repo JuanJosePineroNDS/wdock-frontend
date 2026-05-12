@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { authStorage } from '@wdock/api-client';
+import { authStorage } from '@app/api-client';
 
 import { AuthBootstrap } from '@/components/auth/AuthBootstrap';
 import { AUTH_SESSION_STORAGE_KEY, useAuthStore } from '@/stores/authStore';
@@ -42,12 +42,12 @@ function freshTokens() {
 
 const fakeUser = {
   id: 'u1',
-  email: 'admin@wdock.com',
+  email: 'admin@example.com',
   rol: 'ADMIN' as const,
   activo: true,
   is_staff: true,
   tenant_id: 't1',
-  tenant_nombre: 'Demo',
+  tenant_nombre: 'Default Tenant',
   ultimo_login: null,
 };
 
@@ -91,7 +91,7 @@ describe('AuthBootstrap', () => {
     await waitFor(() => expect(screen.getByTestId('protected')).toBeInTheDocument());
 
     expect(useAuthStore.getState().isAuthenticated).toBe(true);
-    expect(useAuthStore.getState().user?.email).toBe('admin@wdock.com');
+    expect(useAuthStore.getState().user?.email).toBe('admin@example.com');
     expect(mockApi.POST).not.toHaveBeenCalled();
   });
 
@@ -130,7 +130,7 @@ describe('AuthBootstrap', () => {
 
     expect(mockApi.POST).toHaveBeenCalledTimes(1);
     expect(mockApi.GET).toHaveBeenCalledWith('/api/v1/auth/me');
-    expect(useAuthStore.getState().user?.email).toBe('admin@wdock.com');
+    expect(useAuthStore.getState().user?.email).toBe('admin@example.com');
   });
 
   it('clears storage and stays unauthenticated when both tokens are expired', async () => {

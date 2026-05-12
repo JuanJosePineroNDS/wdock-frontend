@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { cn } from '@wdock/shared/utils';
+import { cn } from '@app/shared/utils';
 
 export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement>;
 

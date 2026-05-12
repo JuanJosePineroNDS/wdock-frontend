@@ -7,16 +7,16 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Bienvenido a WDock Admin</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Welcome to App Admin</h1>
         <p className="text-sm text-muted-foreground">
-          Panel de control para administradores y operadores internos.
+          Admin panel template — start customizing from here.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Tu sesion</CardTitle>
-            <CardDescription>Datos del usuario autenticado actualmente.</CardDescription>
+            <CardTitle>Your session</CardTitle>
+            <CardDescription>Currently authenticated user.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
             {user ? (
@@ -32,12 +32,12 @@ export function DashboardPage() {
                   <span className="font-medium">{user.tenant_nombre}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Rol:</span>{' '}
+                  <span className="text-slate-500">Role:</span>{' '}
                   <span className="font-medium uppercase">{user.rol}</span>
                 </div>
               </>
             ) : (
-              <span className="text-slate-500">No hay sesion activa.</span>
+              <span className="text-slate-500">No active session.</span>
             )}
           </CardContent>
         </Card>

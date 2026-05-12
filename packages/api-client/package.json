@@ -1,5 +1,5 @@
 {
-  "name": "@wdock/api-client",
+  "name": "@app/api-client",
   "version": "0.1.0",
   "private": true,
   "type": "module",

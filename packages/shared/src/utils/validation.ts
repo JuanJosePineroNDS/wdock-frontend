@@ -64,20 +64,20 @@ export function isValidCif(input: string): boolean {
 export const dniSchema = z
   .string()
   .trim()
-  .refine(isValidDni, { message: 'DNI no valido' });
+  .refine(isValidDni, { message: 'Invalid DNI' });
 
 export const nieSchema = z
   .string()
   .trim()
-  .refine(isValidNie, { message: 'NIE no valido' });
+  .refine(isValidNie, { message: 'Invalid NIE' });
 
 export const cifSchema = z
   .string()
   .trim()
-  .refine(isValidCif, { message: 'CIF no valido' });
+  .refine(isValidCif, { message: 'Invalid CIF' });
 
-export const emailSchema = z.string().trim().toLowerCase().email({ message: 'Email no valido' });
+export const emailSchema = z.string().trim().toLowerCase().email({ message: 'Invalid email address' });
 
 export const passwordSchema = z
   .string()
-  .min(8, { message: 'La contrasena debe tener al menos 8 caracteres' });
+  .min(8, { message: 'Password must be at least 8 characters' });

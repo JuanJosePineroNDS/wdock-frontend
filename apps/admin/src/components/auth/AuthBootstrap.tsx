@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { authStorage } from '@wdock/api-client';
+import { authStorage } from '@app/api-client';
 
 import { apiClient } from '@/lib/apiClient';
 import { isJwtExpired } from '@/lib/jwt';
@@ -9,8 +9,8 @@ import { useAuthStore } from '@/stores/authStore';
  * Resolves the auth state from localStorage before the router renders.
  *
  * Why: the Zustand store rehydrates `user` synchronously via the persist
- * middleware, but tokens live in their own keys (`wdock.auth.access`,
- * `wdock.auth.refresh`). On reload we must reconcile both: if the access
+ * middleware, but tokens live in their own keys (`app.auth.access`,
+ * `app.auth.refresh`). On reload we must reconcile both: if the access
  * token is missing/expired, the persisted user is stale and the
  * `ProtectedRoute` redirect would briefly flash /login before the
  * interceptor can fix it.
@@ -122,7 +122,7 @@ function FullScreenLoader() {
     <div
       role="status"
       aria-live="polite"
-      aria-label="Restaurando sesion"
+      aria-label="Restoring session"
       className="flex min-h-screen items-center justify-center bg-slate-50"
     >
       <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />

@@ -1,5 +1,5 @@
 {
-  "name": "wdock-frontend",
+  "name": "app-frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,14 +9,14 @@
     "pnpm": ">=9"
   },
   "scripts": {
-    "dev:admin": "pnpm --filter @wdock/admin dev",
+    "dev:admin": "pnpm --filter @app/admin dev",
     "build": "pnpm -r build",
-    "build:api-client": "pnpm --filter @wdock/api-client build",
+    "build:api-client": "pnpm --filter @app/api-client build",
     "test": "pnpm -r test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate:api": "pnpm --filter @wdock/api-client generate",
+    "generate:api": "pnpm --filter @app/api-client generate",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

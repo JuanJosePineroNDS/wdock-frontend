@@ -1,5 +1,5 @@
-const ACCESS_KEY = 'wdock.auth.access';
-const REFRESH_KEY = 'wdock.auth.refresh';
+const ACCESS_KEY = 'app.auth.access';
+const REFRESH_KEY = 'app.auth.refresh';
 
 export interface StorageLike {
   getItem(key: string): string | null;

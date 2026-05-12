@@ -1,5 +1,5 @@
 {
-  "name": "@wdock/admin",
+  "name": "@app/admin",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@tanstack/react-query": "^5.51.0",
-    "@wdock/api-client": "workspace:*",
-    "@wdock/shared": "workspace:*",
+    "@app/api-client": "workspace:*",
+    "@app/shared": "workspace:*",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.400.0",

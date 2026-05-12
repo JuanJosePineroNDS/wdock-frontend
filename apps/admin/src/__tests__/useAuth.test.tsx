@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { authStorage } from '@wdock/api-client';
+import { authStorage } from '@app/api-client';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/stores/authStore';

@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { authStorage } from '@wdock/api-client';
-import { emailSchema, passwordSchema } from '@wdock/shared/utils';
+import { authStorage } from '@app/api-client';
+import { emailSchema, passwordSchema } from '@app/shared/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -40,11 +40,11 @@ export function LoginPage() {
 
     if (error || !data) {
       if (response.status === 401) {
-        setServerError('Credenciales incorrectas. Revisa el email y la contrasena.');
+        setServerError('Invalid credentials. Check your email and password.');
       } else if (response.status >= 500) {
-        setServerError('No se ha podido conectar con el servidor. Vuelve a intentarlo en unos minutos.');
+        setServerError('Cannot reach the server. Please try again in a few minutes.');
       } else {
-        setServerError('No se ha podido iniciar sesion. Comprueba los datos introducidos.');
+        setServerError('Sign-in failed. Please review the form and try again.');
       }
       return;
     }
@@ -58,21 +58,21 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Acceso a WDock Admin</CardTitle>
+          <CardTitle>Sign in to App Admin</CardTitle>
           <CardDescription>
-            Inicia sesion con tu cuenta corporativa para gestionar la plataforma documental.
+            Use your account to access the admin panel.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4" noValidate>
             {serverError && (
               <Alert variant="destructive" data-testid="login-error">
-                <AlertTitle>No se ha podido iniciar sesion</AlertTitle>
+                <AlertTitle>Sign-in failed</AlertTitle>
                 <AlertDescription>{serverError}</AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electronico</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -85,7 +85,7 @@ export function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contrasena</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -98,7 +98,7 @@ export function LoginPage() {
               )}
             </div>
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Iniciando sesion...' : 'Iniciar sesion'}
+              {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </form>
         </CardContent>
@@ -106,4 +106,3 @@ export function LoginPage() {
     </div>
   );
 }
-

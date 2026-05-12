@@ -1,13 +1,12 @@
 /**
- * Overrides locales sobre el schema OpenAPI generado.
+ * Local overrides on top of the generated OpenAPI schema.
  *
- * El backend WDock todavia no describe completamente algunos endpoints
- * (login y /auth/me no exponen request/response bodies en el OpenAPI). Aqui
- * definimos esos contratos manualmente para que el cliente este completamente
- * tipado mientras tanto.
+ * When the backend OpenAPI does not fully describe an endpoint
+ * (request/response bodies), we declare the contract here so the
+ * client stays fully typed.
  *
- * Cuando el backend los describa correctamente, basta con regenerar y
- * eliminar las entradas correspondientes de este archivo.
+ * When the backend describes the endpoint, regenerate the client
+ * and remove the override here.
  */
 
 import type { paths as GeneratedPaths } from './generated/schema';
@@ -90,4 +89,4 @@ interface PathOverrides {
   };
 }
 
-export type WdockPaths = Omit<GeneratedPaths, keyof PathOverrides> & PathOverrides;
+export type AppPaths = Omit<GeneratedPaths, keyof PathOverrides> & PathOverrides;

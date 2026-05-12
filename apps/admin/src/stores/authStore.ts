@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User } from '@wdock/api-client';
+import type { User } from '@app/api-client';
 
 export type { User };
 
@@ -11,7 +11,7 @@ interface AuthState {
   clearSession: () => void;
 }
 
-export const AUTH_SESSION_STORAGE_KEY = 'wdock.auth.session';
+export const AUTH_SESSION_STORAGE_KEY = 'app.auth.session';
 
 export const useAuthStore = create<AuthState>()(
   persist(

@@ -2,7 +2,7 @@ import createClient, { type Client, type Middleware } from 'openapi-fetch';
 
 import { type AuthStorage, authStorage as defaultStorage } from './auth-storage';
 import { ApiError, AuthError, ValidationError } from './errors';
-import type { WdockPaths } from './schema-overrides';
+import type { AppPaths } from './schema-overrides';
 
 export interface CreateApiClientOptions {
   baseUrl: string;
@@ -22,7 +22,7 @@ export interface CreateApiClientOptions {
   onAuthLogout?: () => void;
 }
 
-export type WdockApiClient = Client<WdockPaths>;
+export type AppApiClient = Client<AppPaths>;
 
 const PUBLIC_PATH_FRAGMENTS = ['/auth/login', '/auth/refresh', '/sign/'];
 
@@ -113,7 +113,7 @@ function buildAuthMiddleware(
         return response;
       }
       // Avoid retrying a request that we already retried.
-      if (request.headers.get('x-wdock-retried') === '1') {
+      if (request.headers.get('x-app-retried') === '1') {
         storage.clear();
         onLogout();
         return response;
@@ -124,7 +124,7 @@ function buildAuthMiddleware(
       }
       const retryHeaders = new Headers(request.headers);
       retryHeaders.set('Authorization', `Bearer ${newAccess}`);
-      retryHeaders.set('x-wdock-retried', '1');
+      retryHeaders.set('x-app-retried', '1');
       const retried = await fetchImpl(request.url, {
         method: request.method,
         headers: retryHeaders,
@@ -136,13 +136,13 @@ function buildAuthMiddleware(
   };
 }
 
-export function createApiClient(options: CreateApiClientOptions): WdockApiClient {
+export function createApiClient(options: CreateApiClientOptions): AppApiClient {
   const storage = options.storage ?? defaultStorage;
   const fetchImpl = options.fetch ?? globalThis.fetch.bind(globalThis);
   const refreshUrl = `${options.baseUrl.replace(/\/$/, '')}${options.refreshPath ?? '/api/v1/auth/refresh'}`;
   const onLogout = options.onAuthLogout ?? defaultLogout;
 
-  const client = createClient<WdockPaths>({
+  const client = createClient<AppPaths>({
     baseUrl: options.baseUrl,
     fetch: fetchImpl,
   });

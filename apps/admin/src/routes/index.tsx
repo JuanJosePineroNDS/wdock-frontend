@@ -13,29 +13,9 @@ export function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/documents" element={<DocumentsPlaceholder />} />
-          <Route path="/users" element={<UsersPlaceholder />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
-  );
-}
-
-function DocumentsPlaceholder() {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold">Documentos</h1>
-      <p className="text-sm text-muted-foreground">Funcionalidad en migración a WDock v2.</p>
-    </div>
-  );
-}
-
-function UsersPlaceholder() {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold">Usuarios</h1>
-      <p className="text-sm text-muted-foreground">Funcionalidad en migración a WDock v2.</p>
-    </div>
   );
 }

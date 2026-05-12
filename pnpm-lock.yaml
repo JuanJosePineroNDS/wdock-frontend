@@ -47,18 +47,18 @@ importers:
 
   apps/admin:
     dependencies:
+      '@app/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@app/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.10.0(react-hook-form@7.75.0(react@18.3.1))
       '@tanstack/react-query':
         specifier: ^5.51.0
         version: 5.100.9(react@18.3.1)
-      '@wdock/api-client':
-        specifier: workspace:*
-        version: link:../../packages/api-client
-      '@wdock/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1

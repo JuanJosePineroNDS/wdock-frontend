@@ -1,4 +1,4 @@
-export { createApiClient, unwrapError, type WdockApiClient, type CreateApiClientOptions } from './client';
+export { createApiClient, unwrapError, type AppApiClient, type CreateApiClientOptions } from './client';
 export {
   authStorage,
   createAuthStorage,
@@ -11,5 +11,5 @@ export type {
   User,
   LoginRequest,
   LoginResponse,
-  WdockPaths,
+  AppPaths,
 } from './schema-overrides';

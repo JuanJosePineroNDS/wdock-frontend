@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authStorage } from '@wdock/api-client';
+import { authStorage } from '@app/api-client';
 
 import { useAuthStore } from '@/stores/authStore';
 
