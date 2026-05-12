@@ -9,9 +9,7 @@ function parseMode(value: string | undefined): RegistrationMode {
   return 'CLOSED';
 }
 
-export const registrationMode: RegistrationMode = parseMode(
-  import.meta.env.VITE_REGISTRATION_MODE,
-);
+export const registrationMode: RegistrationMode = parseMode(import.meta.env.VITE_REGISTRATION_MODE);
 
 export function isPublicRegistrationEnabled(): boolean {
   return registrationMode === 'PUBLIC';

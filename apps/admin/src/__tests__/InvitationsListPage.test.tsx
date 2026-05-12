@@ -111,9 +111,7 @@ describe('InvitationsListPage', () => {
     await user.click(screen.getByRole('button', { name: /create invitation/i }));
 
     const callout = await screen.findByTestId('created-token');
-    expect(within(callout).getByTestId('created-token-value')).toHaveTextContent(
-      'plain-token-abc',
-    );
+    expect(within(callout).getByTestId('created-token-value')).toHaveTextContent('plain-token-abc');
     expect(mockApi.POST).toHaveBeenCalledWith('/api/v1/auth/invitations', {
       body: { email: 'new@example.com', role: 'AUDITOR' },
     });

@@ -53,10 +53,10 @@ The dev server proxies `/api` to `http://localhost:8000` by default (configurabl
 
 `apps/admin/.env.local` (not committed):
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend base URL. Leave empty in dev to use the Vite proxy. | `` |
-| `VITE_APP_NAME` | Display name for the app. | `App` |
+| Variable                 | Description                                                                  | Example  |
+| ------------------------ | ---------------------------------------------------------------------------- | -------- |
+| `VITE_API_BASE_URL`      | Backend base URL. Leave empty in dev to use the Vite proxy.                  | ``       |
+| `VITE_APP_NAME`          | Display name for the app.                                                    | `App`    |
 | `VITE_REGISTRATION_MODE` | Registration mode: `CLOSED`, `INVITATION`, `PUBLIC`. Must match the backend. | `CLOSED` |
 
 ## Typed API client
@@ -84,15 +84,15 @@ OPENAPI_URL=https://staging.example.com/api/schema/ pnpm run generate:api
 
 ## Useful commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm run dev:admin` | Start the admin SPA in dev mode (port 5173) |
-| `pnpm run lint` | Run ESLint across the repo |
-| `pnpm run typecheck` | Type-check all workspaces |
-| `pnpm run test` | Run tests across all workspaces |
-| `pnpm run build` | Build all workspaces |
-| `pnpm run format` | Apply Prettier to the repo |
-| `pnpm run format:check` | Check formatting without writing |
+| Command                 | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `pnpm run dev:admin`    | Start the admin SPA in dev mode (port 5173)        |
+| `pnpm run lint`         | Run ESLint across the repo                         |
+| `pnpm run typecheck`    | Type-check all workspaces                          |
+| `pnpm run test`         | Run tests across all workspaces                    |
+| `pnpm run build`        | Build all workspaces                               |
+| `pnpm run format`       | Apply Prettier to the repo                         |
+| `pnpm run format:check` | Check formatting without writing                   |
 | `pnpm run generate:api` | Regenerate the API client from the backend OpenAPI |
 
 ## Customizing the template

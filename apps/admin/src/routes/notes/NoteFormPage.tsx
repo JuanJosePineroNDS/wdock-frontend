@@ -73,7 +73,9 @@ export function NoteFormPage() {
       </div>
 
       {isEdit && noteQuery.isLoading && (
-        <p role="status" className="text-sm text-slate-500">Loading note…</p>
+        <p role="status" className="text-sm text-slate-500">
+          Loading note…
+        </p>
       )}
       {isEdit && noteQuery.isError && (
         <Alert variant="destructive">

@@ -100,9 +100,7 @@ export function AcceptInvitationPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Accept your invitation</CardTitle>
-          <CardDescription>
-            Choose a password to finish creating your account.
-          </CardDescription>
+          <CardDescription>Choose a password to finish creating your account.</CardDescription>
         </CardHeader>
         <CardContent>
           {loading && (
@@ -153,7 +151,9 @@ export function AcceptInvitationPage() {
                   {...form.register('password')}
                 />
                 {form.formState.errors.password && (
-                  <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.password.message}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -166,7 +166,9 @@ export function AcceptInvitationPage() {
                   {...form.register('confirm')}
                 />
                 {form.formState.errors.confirm && (
-                  <p className="text-sm text-destructive">{form.formState.errors.confirm.message}</p>
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.confirm.message}
+                  </p>
                 )}
               </div>
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>

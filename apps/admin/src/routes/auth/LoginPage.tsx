@@ -63,9 +63,7 @@ export function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign in to App Admin</CardTitle>
-          <CardDescription>
-            Use your account to access the admin panel.
-          </CardDescription>
+          <CardDescription>Use your account to access the admin panel.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4" noValidate>

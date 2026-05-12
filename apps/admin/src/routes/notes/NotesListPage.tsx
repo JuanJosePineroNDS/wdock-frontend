@@ -6,12 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  type Note,
-  useDeleteNote,
-  useNotes,
-  useUpdateNote,
-} from '@/features/notes/hooks';
+import { type Note, useDeleteNote, useNotes, useUpdateNote } from '@/features/notes/hooks';
 
 export function NotesListPage() {
   const [search, setSearch] = useState('');
@@ -73,7 +68,9 @@ export function NotesListPage() {
       </div>
 
       {notesQuery.isLoading && (
-        <p role="status" className="text-sm text-slate-500">Loading notes…</p>
+        <p role="status" className="text-sm text-slate-500">
+          Loading notes…
+        </p>
       )}
       {notesQuery.isError && (
         <Alert variant="destructive">

@@ -21,7 +21,11 @@ type StatusFilter = 'ALL' | components['schemas']['StatusEnum'];
 const createSchema = z.object({
   email: emailSchema,
   role: z.enum(['ADMIN', 'OPERATOR', 'AUDITOR', 'READONLY']),
-  tenant_id: z.string().uuid().optional().or(z.literal('').transform(() => undefined)),
+  tenant_id: z
+    .string()
+    .uuid()
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
 });
 type CreateFormValues = z.infer<typeof createSchema>;
 
@@ -74,10 +78,9 @@ export function InvitationsListPage() {
 
   const cancelMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      const { data, error } = await api.POST(
-        '/api/v1/auth/invitations/{invitation_id}/cancel',
-        { params: { path: { invitation_id: invitationId } } },
-      );
+      const { data, error } = await api.POST('/api/v1/auth/invitations/{invitation_id}/cancel', {
+        params: { path: { invitation_id: invitationId } },
+      });
       if (error || !data) throw new Error('Failed to cancel invitation');
       return data;
     },
@@ -98,9 +101,7 @@ export function InvitationsListPage() {
 
   const invitations = invitationsQuery.data ?? [];
   const filteredInvitations =
-    statusFilter === 'ALL'
-      ? invitations
-      : invitations.filter((inv) => inv.status === statusFilter);
+    statusFilter === 'ALL' ? invitations : invitations.filter((inv) => inv.status === statusFilter);
 
   return (
     <div className="space-y-6">
@@ -125,7 +126,8 @@ export function InvitationsListPage() {
           <CardHeader>
             <CardTitle>New invitation</CardTitle>
             <CardDescription>
-              The user will receive no email — copy the token shown after creation and deliver it manually.
+              The user will receive no email — copy the token shown after creation and deliver it
+              manually.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -165,13 +167,11 @@ export function InvitationsListPage() {
               {isSuperAdmin && (
                 <div className="space-y-2">
                   <Label htmlFor="invite-tenant">Tenant ID (optional)</Label>
-                  <Input
-                    id="invite-tenant"
-                    placeholder="UUID"
-                    {...form.register('tenant_id')}
-                  />
+                  <Input id="invite-tenant" placeholder="UUID" {...form.register('tenant_id')} />
                   {form.formState.errors.tenant_id && (
-                    <p className="text-sm text-destructive">{form.formState.errors.tenant_id.message}</p>
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.tenant_id.message}
+                    </p>
                   )}
                 </div>
               )}
@@ -200,7 +200,9 @@ export function InvitationsListPage() {
       </div>
 
       {invitationsQuery.isLoading && (
-        <p role="status" className="text-sm text-slate-500">Loading invitations…</p>
+        <p role="status" className="text-sm text-slate-500">
+          Loading invitations…
+        </p>
       )}
       {invitationsQuery.isError && (
         <Alert variant="destructive">
@@ -208,15 +210,17 @@ export function InvitationsListPage() {
           <AlertDescription>Please try again later.</AlertDescription>
         </Alert>
       )}
-      {!invitationsQuery.isLoading && !invitationsQuery.isError && filteredInvitations.length === 0 && (
-        <p className="text-sm text-slate-500">No invitations to display.</p>
-      )}
+      {!invitationsQuery.isLoading &&
+        !invitationsQuery.isError &&
+        filteredInvitations.length === 0 && (
+          <p className="text-sm text-slate-500">No invitations to display.</p>
+        )}
 
       {filteredInvitations.length > 0 && (
         <InvitationsTable
           invitations={filteredInvitations}
           onCancel={(id) => cancelMutation.mutate(id)}
-          cancellingId={cancelMutation.isPending ? cancelMutation.variables ?? null : null}
+          cancellingId={cancelMutation.isPending ? (cancelMutation.variables ?? null) : null}
         />
       )}
     </div>

@@ -20,22 +20,22 @@ The dev server proxies `/api` to `http://localhost:8000`. Override with `VITE_AP
 
 Copy `apps/admin/.env.example` to `apps/admin/.env.local` (gitignored) and adjust as needed:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend base URL. Empty in dev to use the Vite proxy. | (empty) |
-| `VITE_APP_NAME` | Display name shown in titles. | `App` |
+| Variable                 | Description                                                  | Default  |
+| ------------------------ | ------------------------------------------------------------ | -------- |
+| `VITE_API_BASE_URL`      | Backend base URL. Empty in dev to use the Vite proxy.        | (empty)  |
+| `VITE_APP_NAME`          | Display name shown in titles.                                | `App`    |
 | `VITE_REGISTRATION_MODE` | `CLOSED`, `INVITATION`, or `PUBLIC`. Must match the backend. | `CLOSED` |
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm run dev:admin` | Start the admin SPA in dev mode |
-| `pnpm run typecheck` | Type-check all workspaces |
-| `pnpm run lint` | Run ESLint across the repo |
-| `pnpm run test` | Run tests in every workspace |
-| `pnpm run build` | Build every workspace |
-| `pnpm run format` | Apply Prettier |
+| Command                 | Description                                        |
+| ----------------------- | -------------------------------------------------- |
+| `pnpm run dev:admin`    | Start the admin SPA in dev mode                    |
+| `pnpm run typecheck`    | Type-check all workspaces                          |
+| `pnpm run lint`         | Run ESLint across the repo                         |
+| `pnpm run test`         | Run tests in every workspace                       |
+| `pnpm run build`        | Build every workspace                              |
+| `pnpm run format`       | Apply Prettier                                     |
 | `pnpm run generate:api` | Regenerate the API client from the backend OpenAPI |
 
 ## First login

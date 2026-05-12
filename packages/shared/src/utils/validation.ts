@@ -61,22 +61,17 @@ export function isValidCif(input: string): boolean {
 }
 
 // Schemas Zod reutilizables.
-export const dniSchema = z
+export const dniSchema = z.string().trim().refine(isValidDni, { message: 'Invalid DNI' });
+
+export const nieSchema = z.string().trim().refine(isValidNie, { message: 'Invalid NIE' });
+
+export const cifSchema = z.string().trim().refine(isValidCif, { message: 'Invalid CIF' });
+
+export const emailSchema = z
   .string()
   .trim()
-  .refine(isValidDni, { message: 'Invalid DNI' });
-
-export const nieSchema = z
-  .string()
-  .trim()
-  .refine(isValidNie, { message: 'Invalid NIE' });
-
-export const cifSchema = z
-  .string()
-  .trim()
-  .refine(isValidCif, { message: 'Invalid CIF' });
-
-export const emailSchema = z.string().trim().toLowerCase().email({ message: 'Invalid email address' });
+  .toLowerCase()
+  .email({ message: 'Invalid email address' });
 
 export const passwordSchema = z
   .string()

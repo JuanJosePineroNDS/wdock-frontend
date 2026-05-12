@@ -24,14 +24,9 @@ export function useLocalStorage<T>(key: string, initial: T): [T, Setter<T>] {
     }
   }, [key, value]);
 
-  const set = useCallback<Setter<T>>(
-    (next) => {
-      setValue((prev) =>
-        typeof next === 'function' ? (next as (p: T) => T)(prev) : next,
-      );
-    },
-    [],
-  );
+  const set = useCallback<Setter<T>>((next) => {
+    setValue((prev) => (typeof next === 'function' ? (next as (p: T) => T)(prev) : next));
+  }, []);
 
   return [value, set];
 }

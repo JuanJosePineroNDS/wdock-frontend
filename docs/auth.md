@@ -4,10 +4,10 @@ The template uses JWT (Simple JWT from Django REST Framework). Tokens are stored
 
 ## Tokens and storage keys
 
-| Key | Set by | Purpose |
-|-----|--------|---------|
-| `app.auth.access` | `authStorage.setTokens` | Short-lived access JWT (~minutes). |
-| `app.auth.refresh` | `authStorage.setTokens` | Refresh JWT (~days). Used to obtain a new access token. |
+| Key                | Set by                       | Purpose                                                        |
+| ------------------ | ---------------------------- | -------------------------------------------------------------- |
+| `app.auth.access`  | `authStorage.setTokens`      | Short-lived access JWT (~minutes).                             |
+| `app.auth.refresh` | `authStorage.setTokens`      | Refresh JWT (~days). Used to obtain a new access token.        |
 | `app.auth.session` | Zustand `persist` middleware | Persisted snapshot of the authenticated user (`useAuthStore`). |
 
 The constants live in `packages/api-client/src/auth-storage.ts` and `apps/admin/src/stores/authStore.ts`. Rename them together if you rebrand the storage namespace.

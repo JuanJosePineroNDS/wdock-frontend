@@ -1,10 +1,5 @@
 export { cn } from './classnames';
-export {
-  formatIsoDate,
-  formatIsoDateTime,
-  formatNumber,
-  formatCurrency,
-} from './format';
+export { formatIsoDate, formatIsoDateTime, formatNumber, formatCurrency } from './format';
 export {
   isValidDni,
   isValidNie,

@@ -28,7 +28,10 @@ function renderList() {
   );
 }
 
-function note(id: string, overrides: Partial<{ title: string; body: string; pinned: boolean }> = {}) {
+function note(
+  id: string,
+  overrides: Partial<{ title: string; body: string; pinned: boolean }> = {},
+) {
   return {
     id,
     title: overrides.title ?? `Note ${id}`,

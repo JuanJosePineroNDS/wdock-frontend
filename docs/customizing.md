@@ -13,11 +13,11 @@ The template uses the package scope `@app/*` and the workspace name `app-fronten
 
 `VITE_REGISTRATION_MODE` drives the UI. It must match the backend's `REGISTRATION_MODE` setting.
 
-| Mode | What the UI shows |
-|------|-------------------|
-| `CLOSED` | Only the sign-in form. No public routes for sign-up or invitations. |
+| Mode         | What the UI shows                                                                                                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLOSED`     | Only the sign-in form. No public routes for sign-up or invitations.                                                                                         |
 | `INVITATION` | Sign-in form + a hint about invitations. The `/invitations/:token` route is always available so users can accept an invitation from a manually-shared link. |
-| `PUBLIC` | Sign-in form + sign-up link. `/register` becomes a fully usable page. |
+| `PUBLIC`     | Sign-in form + sign-up link. `/register` becomes a fully usable page.                                                                                       |
 
 Invitations also work in `CLOSED` and `PUBLIC` mode — they are simply not advertised on the login screen. Admin and superadmin users always see the **Invitations** entry in the sidebar.
 

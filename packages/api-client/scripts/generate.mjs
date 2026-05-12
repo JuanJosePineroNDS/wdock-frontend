@@ -5,10 +5,7 @@ const url = process.env.OPENAPI_URL || 'http://localhost:8000/api/schema/';
 console.log(`Generating types from: ${url}`);
 
 try {
-  execSync(
-    `openapi-typescript "${url}" -o ./src/generated/schema.ts`,
-    { stdio: 'inherit' }
-  );
+  execSync(`openapi-typescript "${url}" -o ./src/generated/schema.ts`, { stdio: 'inherit' });
   console.log('Types generated successfully');
 } catch {
   console.error('Failed to generate types');

@@ -24,11 +24,7 @@ export interface CreateApiClientOptions {
 
 export type AppApiClient = Client<AppPaths>;
 
-const PUBLIC_PATH_FRAGMENTS = [
-  '/auth/login',
-  '/auth/refresh',
-  '/auth/register/public',
-];
+const PUBLIC_PATH_FRAGMENTS = ['/auth/login', '/auth/refresh', '/auth/register/public'];
 
 const PUBLIC_PATH_REGEXES: readonly RegExp[] = [
   // GET/POST /api/v1/auth/invitations/{token}[/accept] are public (no auth).
