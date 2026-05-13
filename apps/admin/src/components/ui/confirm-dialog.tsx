@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -73,18 +72,3 @@ export function ConfirmDialog({
   );
 }
 
-/**
- * Hook helper to drive a ConfirmDialog with optional reason field for cancel-style flows.
- */
-export interface UseConfirmReasonOpts {
-  initialReason?: string;
-}
-
-export function useConfirmReason(opts: UseConfirmReasonOpts = {}) {
-  const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState(opts.initialReason ?? '');
-  useEffect(() => {
-    if (!open) setReason(opts.initialReason ?? '');
-  }, [open, opts.initialReason]);
-  return { open, setOpen, reason, setReason };
-}

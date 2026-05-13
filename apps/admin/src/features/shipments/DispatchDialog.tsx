@@ -46,7 +46,10 @@ export function DispatchDialog({ open, onOpenChange, shipment }: DispatchDialogP
   });
 
   const dispatch = useDispatchShipment(shipment.id);
-  const carriers = carriersQuery.data?.results ?? [];
+  const carriers = useMemo<Carrier[]>(
+    () => carriersQuery.data?.results ?? [],
+    [carriersQuery.data],
+  );
   const selected = useMemo(
     () => carriers.find((c) => c.id === selectedId),
     [carriers, selectedId],
