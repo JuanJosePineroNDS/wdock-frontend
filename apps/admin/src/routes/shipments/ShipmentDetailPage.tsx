@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useShipment } from '@/features/shipments/hooks';
 import { ShipmentStatusBadge } from './StatusBadge';
+import { ShipmentActions } from './ShipmentActions';
+import { ShipmentDispatchHistory } from './ShipmentDispatchHistory';
 
 export function ShipmentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -28,17 +30,20 @@ export function ShipmentDetailPage() {
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div className="space-y-1">
         <Link to="/shipments" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Volver a albaranes
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight" data-testid="shipment-id">
-            Albarán {data.crm_external_id}
-          </h1>
-          <ShipmentStatusBadge status={data.status} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight" data-testid="shipment-id">
+              Albarán {data.crm_external_id}
+            </h1>
+            <ShipmentStatusBadge status={data.status} />
+          </div>
+          <ShipmentActions shipment={data} />
         </div>
       </div>
 
@@ -50,19 +55,24 @@ export function ShipmentDetailPage() {
           <Field label="Fecha programada" value={formatIsoDate(data.scheduled_date)} />
           <Field label="Transportista esperado" value={data.expected_carrier_name} />
           <Field label="Teléfono esperado" value={data.expected_carrier_phone} />
+          <Field label="Matrícula esperada" value={data.expected_license_plate} />
           <Field label="Mercancía" value={data.cargo_description} />
           <Field label="Albarán PDF" value={data.document ?? 'Pendiente de subida'} />
+          <Field label="Notas" value={data.notes} />
           <Field label="Creado" value={formatIsoDateTime(data.created_at)} />
           <Field label="Actualizado" value={formatIsoDateTime(data.updated_at)} />
+          {data.cancelled_at && <Field label="Cancelado" value={formatIsoDateTime(data.cancelled_at)} />}
         </CardContent>
       </Card>
 
-      <Alert>
-        <AlertTitle>Acciones del operador disponibles próximamente</AlertTitle>
-        <AlertDescription>
-          Iniciar envío, cancelar y reenviar SMS llegarán en la siguiente fase (F3).
-        </AlertDescription>
-      </Alert>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Historial de envíos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ShipmentDispatchHistory shipmentId={data.id} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
