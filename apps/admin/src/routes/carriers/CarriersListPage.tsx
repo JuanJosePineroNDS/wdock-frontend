@@ -1,11 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Pencil, Plus, ShieldOff, Shield } from 'lucide-react';
+import { toast } from 'sonner';
 import { formatIsoDateTime } from '@wdock/shared/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCarriers } from '@/features/carriers/hooks';
+import {
+  useActivateCarrier,
+  useCarriers,
+  useDeactivateCarrier,
+  type Carrier,
+} from '@/features/carriers/hooks';
+import { CarrierFormDialog } from '@/features/carriers/CarrierFormDialog';
 
 function asPlateList(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -17,23 +27,37 @@ function asPlateList(value: unknown): string[] {
 export function CarriersListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
-  const [activeOnly, setActiveOnly] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingCarrier, setEditingCarrier] = useState<Carrier | undefined>(undefined);
+  const [confirmTarget, setConfirmTarget] = useState<Carrier | null>(null);
 
   const { data, isLoading, isError, error } = useCarriers({
     search: search || undefined,
     ordering: 'full_name',
+    show_inactive: showInactive || undefined,
   });
 
-  const filtered = useMemo(() => {
-    if (!data) return [];
-    return data.results.filter((row) => (!activeOnly || row.active));
-  }, [data, activeOnly]);
+  const onCreate = () => {
+    setEditingCarrier(undefined);
+    setFormOpen(true);
+  };
+  const onEdit = (carrier: Carrier) => {
+    setEditingCarrier(carrier);
+    setFormOpen(true);
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Transportistas</h1>
-        <p className="text-sm text-muted-foreground">Listado de transportistas registrados.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Transportistas</h1>
+          <p className="text-sm text-muted-foreground">Listado de transportistas registrados.</p>
+        </div>
+        <Button onClick={onCreate} data-testid="carriers-new">
+          <Plus className="h-4 w-4" aria-hidden />
+          Nuevo transportista
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4">
@@ -52,12 +76,12 @@ export function CarriersListPage() {
         <label className="flex items-center gap-2 pb-2 text-sm text-slate-700">
           <input
             type="checkbox"
-            checked={activeOnly}
-            onChange={(e) => setActiveOnly(e.target.checked)}
+            checked={showInactive}
+            onChange={(e) => setShowInactive(e.target.checked)}
             className="h-4 w-4 rounded border-slate-300"
-            data-testid="carriers-active-only"
+            data-testid="carriers-show-inactive"
           />
-          Solo activos
+          Mostrar inactivos
         </label>
       </div>
 
@@ -74,7 +98,7 @@ export function CarriersListPage() {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </div>
-      ) : filtered.length > 0 ? (
+      ) : data && data.results.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -85,19 +109,24 @@ export function CarriersListPage() {
                 <th className="px-4 py-3">Matrículas</th>
                 <th className="px-4 py-3">Activo</th>
                 <th className="px-4 py-3">Actualizado</th>
+                <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((row) => {
+              {data.results.map((row) => {
                 const plates = asPlateList(row.license_plates);
                 return (
                   <tr
                     key={row.id}
-                    className="cursor-pointer transition-colors hover:bg-slate-50"
-                    onClick={() => navigate(`/carriers/${row.id}`)}
+                    className="transition-colors hover:bg-slate-50"
                     data-testid="carriers-row"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-900">{row.full_name}</td>
+                    <td
+                      className="cursor-pointer px-4 py-3 font-medium text-slate-900"
+                      onClick={() => navigate(`/carriers/${row.id}`)}
+                    >
+                      {row.full_name}
+                    </td>
                     <td className="px-4 py-3 text-slate-700">{row.dni}</td>
                     <td className="px-4 py-3 text-slate-700">{row.mobile_phone}</td>
                     <td className="px-4 py-3 text-slate-700">
@@ -130,6 +159,13 @@ export function CarriersListPage() {
                     <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {formatIsoDateTime(row.updated_at)}
                     </td>
+                    <td className="px-4 py-3">
+                      <CarrierActionButtons
+                        carrier={row}
+                        onEdit={() => onEdit(row)}
+                        onToggleActive={() => setConfirmTarget(row)}
+                      />
+                    </td>
                   </tr>
                 );
               })}
@@ -141,6 +177,110 @@ export function CarriersListPage() {
           <p className="text-sm text-slate-700">No hay transportistas que coincidan con los filtros.</p>
         </div>
       )}
+
+      <CarrierFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        mode={editingCarrier ? 'edit' : 'create'}
+        carrier={editingCarrier}
+      />
+
+      <ToggleActiveConfirm
+        carrier={confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+      />
     </div>
+  );
+}
+
+interface CarrierActionButtonsProps {
+  carrier: Carrier;
+  onEdit: () => void;
+  onToggleActive: () => void;
+}
+
+function CarrierActionButtons({ carrier, onEdit, onToggleActive }: CarrierActionButtonsProps) {
+  return (
+    <div className="flex justify-end gap-1">
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onEdit}
+        aria-label="Editar"
+        data-testid="carriers-row-edit"
+      >
+        <Pencil className="h-4 w-4" aria-hidden />
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={onToggleActive}
+        aria-label={carrier.active ? 'Desactivar' : 'Activar'}
+        data-testid="carriers-row-toggle"
+      >
+        {carrier.active ? (
+          <ShieldOff className="h-4 w-4 text-red-600" aria-hidden />
+        ) : (
+          <Shield className="h-4 w-4 text-emerald-600" aria-hidden />
+        )}
+      </Button>
+    </div>
+  );
+}
+
+interface ToggleActiveConfirmProps {
+  carrier: Carrier | null;
+  onClose: () => void;
+}
+
+function ToggleActiveConfirm({ carrier, onClose }: ToggleActiveConfirmProps) {
+  const deactivate = useDeactivateCarrier(carrier?.id ?? '');
+  const activate = useActivateCarrier(carrier?.id ?? '');
+  const [error, setError] = useState<string | null>(null);
+
+  if (!carrier) return null;
+
+  const willDeactivate = carrier.active;
+  const pending = willDeactivate ? deactivate.isPending : activate.isPending;
+
+  const onConfirm = () => {
+    setError(null);
+    const onSuccess = () => {
+      toast.success(
+        willDeactivate
+          ? `Transportista ${carrier.full_name} desactivado`
+          : `Transportista ${carrier.full_name} activado`,
+      );
+      onClose();
+    };
+    const onError = (err: Error) => {
+      setError(err.message || 'No se pudo completar la acción.');
+    };
+
+    if (willDeactivate) {
+      deactivate.mutate(undefined, { onSuccess, onError });
+    } else {
+      activate.mutate(undefined, { onSuccess, onError });
+    }
+  };
+
+  return (
+    <ConfirmDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title={willDeactivate ? `¿Desactivar ${carrier.full_name}?` : `¿Activar ${carrier.full_name}?`}
+      description={
+        willDeactivate
+          ? 'El transportista se ocultará de la lista por defecto. Sus envíos previos se conservan.'
+          : 'El transportista volverá a aparecer en la lista y podrá recibir nuevos envíos.'
+      }
+      confirmLabel={willDeactivate ? 'Desactivar' : 'Activar'}
+      destructive={willDeactivate}
+      pending={pending}
+      error={error}
+      onConfirm={onConfirm}
+    />
   );
 }
