@@ -4,6 +4,9 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from './auth/LoginPage';
 import { DashboardPage } from './dashboard/DashboardPage';
+import { ImportsListPage } from './imports/ImportsListPage';
+import { ImportUploadPage } from './imports/ImportUploadPage';
+import { ImportDetailPage } from './imports/ImportDetailPage';
 
 export function AppRoutes() {
   return (
@@ -13,6 +16,9 @@ export function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/imports" element={<ImportsListPage />} />
+          <Route path="/imports/new" element={<ImportUploadPage />} />
+          <Route path="/imports/:id" element={<ImportDetailPage />} />
           <Route path="/documents" element={<DocumentsPlaceholder />} />
           <Route path="/users" element={<UsersPlaceholder />} />
         </Route>
