@@ -84,6 +84,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/carriers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``search`` — case-insensitive substring search across
+         *         ``dni``, ``full_name`` and ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at``.
+         */
+        get: operations["carriers_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/carriers/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``search`` — case-insensitive substring search across
+         *         ``dni``, ``full_name`` and ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at``.
+         */
+        get: operations["carriers_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/documents": {
         parameters: {
             query?: never;
@@ -182,19 +234,155 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/imports/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve Excel imports owned by the user's tenant.
+         *
+         *     Includes the ``upload_excel`` extra action at ``POST /imports/excel`` that
+         *     uploads the file to S3 and dispatches the async processing task.
+         */
+        get: operations["imports_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve Excel imports owned by the user's tenant.
+         *
+         *     Includes the ``upload_excel`` extra action at ``POST /imports/excel`` that
+         *     uploads the file to S3 and dispatches the async processing task.
+         */
+        get: operations["imports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/imports/excel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Upload an Excel file and trigger async processing. */
+        post: operations["imports_upload_excel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve shipments owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``status`` — exact match (e.g. ``?status=PROGRAMMED``).
+         *       * ``scheduled_date`` — ISO date exact match (e.g. ``?scheduled_date=2026-05-11``).
+         *       * ``search`` — case-insensitive substring search across
+         *         ``crm_external_id``, ``expected_carrier_name`` and ``cargo_description``.
+         *       * ``ordering`` — one of ``scheduled_date`` / ``-scheduled_date`` /
+         *         ``created_at`` / ``-created_at``.
+         */
+        get: operations["shipments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve shipments owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``status`` — exact match (e.g. ``?status=PROGRAMMED``).
+         *       * ``scheduled_date`` — ISO date exact match (e.g. ``?scheduled_date=2026-05-11``).
+         *       * ``search`` — case-insensitive substring search across
+         *         ``crm_external_id``, ``expected_carrier_name`` and ``cargo_description``.
+         *       * ``ordering`` — one of ``scheduled_date`` / ``-scheduled_date`` /
+         *         ``created_at`` / ``-created_at``.
+         */
+        get: operations["shipments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
-         * @description * `ADMIN` - Administrador
+         * @description * `SUPERADMIN` - Superadmin global
+         *     * `ADMIN` - Administrador
          *     * `OPERADOR` - Operador
          *     * `INTEGRACION_ERP` - Integración ERP
          *     * `AUDITOR` - Auditor
          *     * `SOLO_LECTURA` - Sólo lectura
          * @enum {string}
          */
-        AuthRole: "ADMIN" | "OPERADOR" | "INTEGRACION_ERP" | "AUDITOR" | "SOLO_LECTURA";
+        AuthRole: "SUPERADMIN" | "ADMIN" | "OPERADOR" | "INTEGRACION_ERP" | "AUDITOR" | "SOLO_LECTURA";
+        /** @description Read-only representation of a carrier. */
+        Carrier: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            readonly full_name: string;
+            /** @description Spanish DNI or NIE. Format validated. */
+            readonly dni: string;
+            /** @description E.164 format recommended (e.g. +34666123456). */
+            readonly mobile_phone: string;
+            /** @description List of vehicle license plates associated with this carrier. */
+            readonly license_plates: unknown;
+            readonly notes: string;
+            readonly active: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         /** @description Body of ``POST /api/v1/documents``. */
         DocumentCreateRequest: {
             documento: components["schemas"]["DocumentoBlobRequest"];
@@ -211,7 +399,7 @@ export interface components {
             readonly hash_sha256_firmado: string | null;
             readonly size_bytes: number;
             /** Format: date-time */
-            readonly creado_en: string;
+            readonly created_at: string;
         };
         /** @description Compact 202 response shape returned by the POST endpoint. */
         DocumentReceipt: {
@@ -226,7 +414,7 @@ export interface components {
              * Format: date-time
              * @description UTC timestamp of the insert.
              */
-            creado_en: string;
+            created_at: string;
         };
         /** @description The actual PDF bytes the caller is uploading. */
         DocumentoBlobRequest: {
@@ -239,6 +427,41 @@ export interface components {
              * @default application/pdf
              */
             mime_type: string;
+        };
+        /** @description Read-only serializer returned by list/retrieve endpoints. */
+        ExcelImport: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly original_filename: string;
+            readonly size_bytes: number;
+            readonly status: components["schemas"]["ExcelImportStatusEnum"];
+            readonly carriers_created: number;
+            readonly carriers_updated: number;
+            readonly shipments_created: number;
+            readonly shipments_updated: number;
+            readonly rows_processed: number;
+            readonly rows_failed: number;
+            readonly errors: unknown;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly started_at: string | null;
+            /** Format: date-time */
+            readonly completed_at: string | null;
+            readonly error_message: string;
+        };
+        /**
+         * @description * `PENDING` - Pending
+         *     * `PROCESSING` - Processing
+         *     * `COMPLETED` - Completed
+         *     * `FAILED` - Failed
+         * @enum {string}
+         */
+        ExcelImportStatusEnum: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+        /** @description Validates the multipart payload before enqueuing the Celery task. */
+        ExcelImportUploadRequest: {
+            /** Format: binary */
+            file: string;
         };
         /** @description Email/password payload posted to ``POST /api/v1/auth/login``. */
         LoginRequest: {
@@ -273,6 +496,7 @@ export interface components {
             /**
              * @description Tenant-wide role for the current user.
              *
+             *     * `SUPERADMIN` - Superadmin global
              *     * `ADMIN` - Administrador
              *     * `OPERADOR` - Operador
              *     * `INTEGRACION_ERP` - Integración ERP
@@ -290,12 +514,27 @@ export interface components {
              */
             readonly tenant_id: string;
             /** @description Human-readable tenant name (cached at login). */
-            readonly tenant_nombre: string | null;
+            readonly tenant_name: string | null;
             /**
              * Format: date-time
              * @description Last successful login (UTC). null if never logged in.
              */
             ultimo_login: string | null;
+        };
+        PaginatedCarrierList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Carrier"][];
         };
         PaginatedDocumentList: {
             /** @description Total elements across all pages. */
@@ -311,6 +550,36 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["DocumentOutput"][];
+        };
+        PaginatedExcelImportList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ExcelImport"][];
+        };
+        PaginatedShipmentList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Shipment"][];
         };
         /**
          * @description RFC 7807 Problem Details envelope used by every error response.
@@ -343,6 +612,49 @@ export interface components {
             /** @description Rotated refresh JWT (only when ``ROTATE_REFRESH_TOKENS=True``). Replace the previous refresh in the client store. */
             refresh?: string;
         };
+        /** @description Read-only representation of a shipment. */
+        Shipment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            /**
+             * Format: uuid
+             * @description Campa where the dispatch takes place. Optional if not provided.
+             */
+            readonly campa: string | null;
+            /** @description External shipment id from the source system. Unique per tenant. */
+            readonly crm_external_id: string;
+            /**
+             * Format: date
+             * @description Date the shipment is scheduled to depart.
+             */
+            readonly scheduled_date: string;
+            readonly expected_carrier_name: string;
+            readonly expected_carrier_phone: string;
+            readonly cargo_description: string;
+            readonly status: components["schemas"]["ShipmentStatusEnum"];
+            /**
+             * Format: uuid
+             * @description Albarán PDF. Filled by the import flow (Fase F1).
+             */
+            readonly document: string | null;
+            /** @description Snapshot of raw data received from the source system. */
+            readonly crm_metadata: unknown;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `PROGRAMMED` - Programmed
+         *     * `IN_PROCESS` - In process
+         *     * `SIGNED` - Signed
+         *     * `EXPIRED` - Expired
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        ShipmentStatusEnum: "PROGRAMMED" | "IN_PROCESS" | "SIGNED" | "EXPIRED" | "CANCELLED";
     };
     responses: never;
     parameters: never;
@@ -490,14 +802,62 @@ export interface operations {
             };
         };
     };
+    carriers_list: {
+        parameters: {
+            query?: {
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCarrierList"];
+                };
+            };
+        };
+    };
+    carriers_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Carrier. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carrier"];
+                };
+            };
+        };
+    };
     documents_list: {
         parameters: {
             query?: {
-                /** @description Inclusive lower bound on creado_en (date only). */
+                /** @description Inclusive lower bound on created_at (date only). */
                 desde?: string;
-                /** @description Inclusive upper bound on creado_en (date only). */
+                /** @description Inclusive upper bound on created_at (date only). */
                 hasta?: string;
-                ordering?: "-creado_en" | "creado_en";
+                ordering?: "-created_at" | "created_at";
                 page?: number;
                 /** @description Items per page (max 100). */
                 page_size?: number;
@@ -793,6 +1153,121 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    imports_list: {
+        parameters: {
+            query?: {
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedExcelImportList"];
+                };
+            };
+        };
+    };
+    imports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Excel import. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExcelImport"];
+                };
+            };
+        };
+    };
+    imports_upload_excel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ExcelImportUploadRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExcelImport"];
+                };
+            };
+        };
+    };
+    shipments_list: {
+        parameters: {
+            query?: {
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedShipmentList"];
+                };
+            };
+        };
+    };
+    shipments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Shipment. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shipment"];
                 };
             };
         };
