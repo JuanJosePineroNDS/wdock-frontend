@@ -4,6 +4,52 @@
  */
 
 export interface paths {
+    "/api/v1/activity-log/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve ActivityLog entries scoped to the user's tenant.
+         *
+         *     The endpoint is intentionally read-only — ActivityLog rows are
+         *     append-only by design (the model raises on save/delete after the
+         *     first insert).
+         */
+        get: operations["activity_log_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/activity-log/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve ActivityLog entries scoped to the user's tenant.
+         *
+         *     The endpoint is intentionally read-only — ActivityLog rows are
+         *     append-only by design (the model raises on save/delete after the
+         *     first insert).
+         */
+        get: operations["activity_log_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -92,18 +138,56 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description List and retrieve carriers owned by the user's tenant.
+         * @description CRUD endpoints for carriers owned by the user's tenant.
          *
          *     Filters (query params):
          *       * ``active`` — ``true`` / ``false`` to filter by active flag.
-         *       * ``search`` — case-insensitive substring search across
-         *         ``dni``, ``full_name`` and ``mobile_phone``.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
          *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
-         *         ``-created_at``.
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
          */
         get: operations["carriers_list"];
         put?: never;
-        post?: never;
+        /**
+         * @description CRUD endpoints for carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
+         */
+        post: operations["carriers_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -118,18 +202,136 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description List and retrieve carriers owned by the user's tenant.
+         * @description CRUD endpoints for carriers owned by the user's tenant.
          *
          *     Filters (query params):
          *       * ``active`` — ``true`` / ``false`` to filter by active flag.
-         *       * ``search`` — case-insensitive substring search across
-         *         ``dni``, ``full_name`` and ``mobile_phone``.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
          *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
-         *         ``-created_at``.
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
          */
         get: operations["carriers_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description CRUD endpoints for carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
+         */
+        patch: operations["carriers_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/carriers/{id}/activate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description CRUD endpoints for carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
+         */
+        post: operations["carriers_activate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/carriers/{id}/deactivate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description CRUD endpoints for carriers owned by the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``active`` — ``true`` / ``false`` to filter by active flag.
+         *       * ``show_inactive`` — ``true`` to bypass the default active-only
+         *         filter and list every carrier in the tenant.
+         *       * ``search`` — substring search across ``dni``, ``full_name``,
+         *         ``mobile_phone``.
+         *       * ``ordering`` — ``full_name`` / ``-full_name`` / ``created_at`` /
+         *         ``-created_at`` / ``updated_at`` / ``-updated_at``.
+         *
+         *     Actions:
+         *       * ``POST`` — create. If a Carrier with the same DNI already exists
+         *         in the tenant (active or inactive) it is **reactivated** with
+         *         the new field values, returned with 200 instead of 201.
+         *       * ``PATCH /carriers/{id}/`` — update. An audit log entry with the
+         *         diff is written when at least one field actually changes.
+         *       * ``POST /carriers/{id}/deactivate/`` — soft-delete.
+         *       * ``POST /carriers/{id}/activate/`` — undo a deactivation.
+         *
+         *     DELETE is intentionally not supported; carriers are soft-deleted via
+         *     ``deactivate`` to preserve historical shipment / SMS data.
+         */
+        post: operations["carriers_deactivate_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -303,15 +505,21 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description List and retrieve shipments owned by the user's tenant.
+         * @description List, retrieve and trigger SMS dispatches for shipments.
          *
          *     Filters (query params):
          *       * ``status`` — exact match (e.g. ``?status=PROGRAMMED``).
-         *       * ``scheduled_date`` — ISO date exact match (e.g. ``?scheduled_date=2026-05-11``).
+         *       * ``scheduled_date`` — ISO date exact match.
+         *       * ``scheduled_date_from`` / ``scheduled_date_to`` — inclusive range.
          *       * ``search`` — case-insensitive substring search across
          *         ``crm_external_id``, ``expected_carrier_name`` and ``cargo_description``.
          *       * ``ordering`` — one of ``scheduled_date`` / ``-scheduled_date`` /
-         *         ``created_at`` / ``-created_at``.
+         *         ``created_at`` / ``-created_at`` / ``status``.
+         *
+         *     Actions:
+         *       * ``POST /shipments/{id}/dispatch/`` — start a new SMS dispatch.
+         *       * ``POST /shipments/{id}/resend/`` — re-send the latest dispatch
+         *         (subject to a cooldown).
          */
         get: operations["shipments_list"];
         put?: never;
@@ -330,15 +538,21 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description List and retrieve shipments owned by the user's tenant.
+         * @description List, retrieve and trigger SMS dispatches for shipments.
          *
          *     Filters (query params):
          *       * ``status`` — exact match (e.g. ``?status=PROGRAMMED``).
-         *       * ``scheduled_date`` — ISO date exact match (e.g. ``?scheduled_date=2026-05-11``).
+         *       * ``scheduled_date`` — ISO date exact match.
+         *       * ``scheduled_date_from`` / ``scheduled_date_to`` — inclusive range.
          *       * ``search`` — case-insensitive substring search across
          *         ``crm_external_id``, ``expected_carrier_name`` and ``cargo_description``.
          *       * ``ordering`` — one of ``scheduled_date`` / ``-scheduled_date`` /
-         *         ``created_at`` / ``-created_at``.
+         *         ``created_at`` / ``-created_at`` / ``status``.
+         *
+         *     Actions:
+         *       * ``POST /shipments/{id}/dispatch/`` — start a new SMS dispatch.
+         *       * ``POST /shipments/{id}/resend/`` — re-send the latest dispatch
+         *         (subject to a cooldown).
          */
         get: operations["shipments_retrieve"];
         put?: never;
@@ -349,10 +563,194 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shipments/{id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Cancel a Shipment and any active SMS dispatches associated with it.
+         *
+         *     Only PROGRAMMED or IN_PROCESS (carrier already received the SMS but
+         *     has not signed yet) shipments can be cancelled.
+         */
+        post: operations["shipments_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{id}/dispatch/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Start an SMS dispatch for this shipment using ``carrier_id``. */
+        post: operations["shipments_dispatch_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipments/{id}/edit/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Edit mutable fields of a Shipment (``crm_external_id`` excluded). */
+        patch: operations["shipments_edit_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/shipments/{id}/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Re-send the latest SMS dispatch for this shipment.
+         *
+         *     Constraints:
+         *       * 404 if no previous dispatch exists for this shipment.
+         *       * 429 if the previous dispatch was created less than
+         *         ``SMS_DISPATCH_RESEND_COOLDOWN_SECONDS`` ago.
+         *       * 409 if an active (non-FAILED) dispatch already exists today
+         *         (idempotency).
+         */
+        post: operations["shipments_resend_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sms-dispatches/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve SMS dispatches scoped to the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``status`` — exact match (PENDING, SENT, DELIVERED, FAILED,
+         *         SIGNED, EXPIRED, CANCELLED).
+         *       * ``shipment`` — UUID of the parent shipment.
+         *       * ``carrier`` — UUID of the carrier.
+         *       * ``ordering`` — ``initiated_at`` / ``-initiated_at`` /
+         *         ``sent_at`` / ``-sent_at``.
+         *
+         *     The detail response includes ``delivery_callbacks``, ``retry_count``
+         *     and every timestamp so the frontend can render a complete send
+         *     history per Shipment.
+         */
+        get: operations["sms_dispatches_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sms-dispatches/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description List and retrieve SMS dispatches scoped to the user's tenant.
+         *
+         *     Filters (query params):
+         *       * ``status`` — exact match (PENDING, SENT, DELIVERED, FAILED,
+         *         SIGNED, EXPIRED, CANCELLED).
+         *       * ``shipment`` — UUID of the parent shipment.
+         *       * ``carrier`` — UUID of the carrier.
+         *       * ``ordering`` — ``initiated_at`` / ``-initiated_at`` /
+         *         ``sent_at`` / ``-sent_at``.
+         *
+         *     The detail response includes ``delivery_callbacks``, ``retry_count``
+         *     and every timestamp so the frontend can render a complete send
+         *     history per Shipment.
+         */
+        get: operations["sms_dispatches_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sms/webhook/labsmobile/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Receive a delivery status callback from LabsMobile. */
+        post: operations["sms_webhook_labsmobile_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description Read-only representation of an ActivityLog entry. */
+        ActivityLog: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string | null;
+            /** Format: uuid */
+            readonly user: string | null;
+            readonly user_email: string | null;
+            /** @description Identificador del actor externo cuando no hay usuario interno (p.ej. 'transportista_telefono:+34666...'). */
+            readonly actor_externo: string;
+            readonly accion: string;
+            readonly recurso_tipo: string;
+            /** Format: uuid */
+            readonly recurso_id: string | null;
+            readonly ip_origen: string | null;
+            readonly user_agent: string;
+            readonly metadata: unknown;
+            /** Format: date-time */
+            readonly timestamp: string;
+            readonly hash_anterior: string;
+            readonly hash_actual: string;
+        };
         /**
          * @description * `SUPERADMIN` - Superadmin global
          *     * `ADMIN` - Administrador
@@ -382,6 +780,40 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        /**
+         * @description Write-side serializer used for POST and PATCH on the Carrier viewset.
+         *
+         *     Validates DNI/NIE (including the check letter) and Spanish mobile
+         *     format, normalizes the phone to E.164. Tenant and ``active`` are
+         *     set/maintained by the view, never by the client.
+         */
+        CarrierWrite: {
+            /** @description Spanish DNI or NIE. Format validated. */
+            dni: string;
+            full_name: string;
+            /** @description E.164 format recommended (e.g. +34666123456). */
+            mobile_phone: string;
+            /** @description List of vehicle license plates associated with this carrier. */
+            license_plates?: unknown;
+            notes?: string;
+        };
+        /**
+         * @description Write-side serializer used for POST and PATCH on the Carrier viewset.
+         *
+         *     Validates DNI/NIE (including the check letter) and Spanish mobile
+         *     format, normalizes the phone to E.164. Tenant and ``active`` are
+         *     set/maintained by the view, never by the client.
+         */
+        CarrierWriteRequest: {
+            /** @description Spanish DNI or NIE. Format validated. */
+            dni: string;
+            full_name: string;
+            /** @description E.164 format recommended (e.g. +34666123456). */
+            mobile_phone: string;
+            /** @description List of vehicle license plates associated with this carrier. */
+            license_plates?: unknown;
+            notes?: string;
         };
         /** @description Body of ``POST /api/v1/documents``. */
         DocumentCreateRequest: {
@@ -521,6 +953,21 @@ export interface components {
              */
             ultimo_login: string | null;
         };
+        PaginatedActivityLogList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ActivityLog"][];
+        };
         PaginatedCarrierList: {
             /** @example 123 */
             count: number;
@@ -581,6 +1028,58 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Shipment"][];
         };
+        PaginatedSmsDispatchList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SmsDispatch"][];
+        };
+        /**
+         * @description Write-side serializer used for POST and PATCH on the Carrier viewset.
+         *
+         *     Validates DNI/NIE (including the check letter) and Spanish mobile
+         *     format, normalizes the phone to E.164. Tenant and ``active`` are
+         *     set/maintained by the view, never by the client.
+         */
+        PatchedCarrierWriteRequest: {
+            /** @description Spanish DNI or NIE. Format validated. */
+            dni?: string;
+            full_name?: string;
+            /** @description E.164 format recommended (e.g. +34666123456). */
+            mobile_phone?: string;
+            /** @description List of vehicle license plates associated with this carrier. */
+            license_plates?: unknown;
+            notes?: string;
+        };
+        /**
+         * @description Write-side serializer for the ``/shipments/{id}/edit/`` action.
+         *
+         *     ``crm_external_id`` is intentionally omitted — it is the idempotency
+         *     key used by the Excel importer and must remain immutable.
+         */
+        PatchedShipmentEditRequest: {
+            expected_carrier_name?: string;
+            expected_carrier_phone?: string;
+            /** @description Vehicle license plate the operator expects to arrive. */
+            expected_license_plate?: string;
+            cargo_description?: string;
+            /**
+             * Format: date
+             * @description Date the shipment is scheduled to depart.
+             */
+            scheduled_date?: string;
+            /** @description Free-form operator notes. Not shown to the carrier. */
+            notes?: string;
+        };
         /**
          * @description RFC 7807 Problem Details envelope used by every error response.
          *
@@ -632,7 +1131,11 @@ export interface components {
             readonly scheduled_date: string;
             readonly expected_carrier_name: string;
             readonly expected_carrier_phone: string;
+            /** @description Vehicle license plate the operator expects to arrive. */
+            readonly expected_license_plate: string;
             readonly cargo_description: string;
+            /** @description Free-form operator notes. Not shown to the carrier. */
+            readonly notes: string;
             readonly status: components["schemas"]["ShipmentStatusEnum"];
             /**
              * Format: uuid
@@ -641,6 +1144,8 @@ export interface components {
             readonly document: string | null;
             /** @description Snapshot of raw data received from the source system. */
             readonly crm_metadata: unknown;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
@@ -655,6 +1160,58 @@ export interface components {
          * @enum {string}
          */
         ShipmentStatusEnum: "PROGRAMMED" | "IN_PROCESS" | "SIGNED" | "EXPIRED" | "CANCELLED";
+        /** @description Read-only representation of an SMS dispatch. */
+        SmsDispatch: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly tenant: string;
+            /** Format: uuid */
+            readonly shipment: string;
+            /** Format: uuid */
+            readonly carrier: string;
+            /** Format: uuid */
+            readonly initiated_by: string;
+            /** @description Snapshot of the carrier's mobile_phone at dispatch time, in case it changes later. Auto-filled by the dispatch service in Fase F2. */
+            readonly phone_snapshot: string;
+            readonly status: components["schemas"]["SmsDispatchStatusEnum"];
+            /** Format: uuid */
+            readonly token: string;
+            /** Format: date-time */
+            readonly initiated_at: string;
+            /**
+             * Format: date-time
+             * @description Token TTL — defaults to SMS_DISPATCH_TOKEN_TTL_HOURS hours after creation.
+             */
+            readonly expires_at: string;
+            /** Format: date-time */
+            readonly sent_at: string | null;
+            /** Format: date-time */
+            readonly delivered_at: string | null;
+            /** Format: date-time */
+            readonly failed_at: string | null;
+            /** Format: date-time */
+            readonly signed_at: string | null;
+            readonly failure_reason: string;
+            readonly retry_count: number;
+            /** @description Provider-side id returned by LabsMobile (or 'mock-...' in MOCK mode). */
+            readonly provider_message_id: string;
+            /** @description SHA-256 hex digest of (shipment_id, phone_snapshot, scheduled day). */
+            readonly idempotency_key: string;
+            /** @description Raw webhook payloads received from LabsMobile (append-only history). */
+            readonly delivery_callbacks: unknown;
+        };
+        /**
+         * @description * `PENDING` - Pending
+         *     * `SENT` - Sent
+         *     * `DELIVERED` - Delivered
+         *     * `FAILED` - Failed
+         *     * `SIGNED` - Signed
+         *     * `EXPIRED` - Expired
+         *     * `CANCELLED` - Cancelled
+         * @enum {string}
+         */
+        SmsDispatchStatusEnum: "PENDING" | "SENT" | "DELIVERED" | "FAILED" | "SIGNED" | "EXPIRED" | "CANCELLED";
     };
     responses: never;
     parameters: never;
@@ -664,6 +1221,60 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    activity_log_list: {
+        parameters: {
+            query?: {
+                accion?: string;
+                from_date?: string;
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                recurso_id?: string;
+                recurso_tipo?: string;
+                /** @description Un término de búsqueda. */
+                search?: string;
+                to_date?: string;
+                user_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedActivityLogList"];
+                };
+            };
+        };
+    };
+    activity_log_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este activity log. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActivityLog"];
+                };
+            };
+        };
+    };
     auth_login: {
         parameters: {
             query?: never;
@@ -805,12 +1416,14 @@ export interface operations {
     carriers_list: {
         parameters: {
             query?: {
+                active?: boolean;
                 /** @description Qué campo usar para ordenar los resultados. */
                 ordering?: string;
                 /** @description Un número de página dentro del conjunto de resultados paginado. */
                 page?: number;
                 /** @description Un término de búsqueda. */
                 search?: string;
+                show_inactive?: boolean;
             };
             header?: never;
             path?: never;
@@ -824,6 +1437,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedCarrierList"];
+                };
+            };
+        };
+    };
+    carriers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CarrierWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CarrierWriteRequest"];
+                "multipart/form-data": components["schemas"]["CarrierWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CarrierWrite"];
                 };
             };
         };
@@ -847,6 +1485,92 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Carrier"];
                 };
+            };
+        };
+    };
+    carriers_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Carrier. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCarrierWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCarrierWriteRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCarrierWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CarrierWrite"];
+                };
+            };
+        };
+    };
+    carriers_activate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Carrier. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carrier"];
+                };
+            };
+            /** @description Carrier already active */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    carriers_deactivate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Carrier. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carrier"];
+                };
+            };
+            /** @description Carrier already inactive */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1160,8 +1884,19 @@ export interface operations {
     imports_list: {
         parameters: {
             query?: {
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
                 /** @description Un número de página dentro del conjunto de resultados paginado. */
                 page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+                /**
+                 * @description * `PENDING` - Pending
+                 *     * `PROCESSING` - Processing
+                 *     * `COMPLETED` - Completed
+                 *     * `FAILED` - Failed
+                 */
+                status?: "COMPLETED" | "FAILED" | "PENDING" | "PROCESSING";
             };
             header?: never;
             path?: never;
@@ -1231,8 +1966,19 @@ export interface operations {
                 ordering?: string;
                 /** @description Un número de página dentro del conjunto de resultados paginado. */
                 page?: number;
+                scheduled_date?: string;
+                scheduled_date_from?: string;
+                scheduled_date_to?: string;
                 /** @description Un término de búsqueda. */
                 search?: string;
+                /**
+                 * @description * `PROGRAMMED` - Programmed
+                 *     * `IN_PROCESS` - In process
+                 *     * `SIGNED` - Signed
+                 *     * `EXPIRED` - Expired
+                 *     * `CANCELLED` - Cancelled
+                 */
+                status?: "CANCELLED" | "EXPIRED" | "IN_PROCESS" | "PROGRAMMED" | "SIGNED";
             };
             header?: never;
             path?: never;
@@ -1269,6 +2015,286 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Shipment"];
                 };
+            };
+        };
+    };
+    shipments_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Shipment. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shipment"];
+                };
+            };
+            /** @description Shipment cannot be cancelled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    shipments_dispatch_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Shipment. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    carrier_id: string;
+                };
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SmsDispatch"];
+                };
+            };
+            /** @description carrier_id is required */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Carrier not found in tenant */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate dispatch for today */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    shipments_edit_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Shipment. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedShipmentEditRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedShipmentEditRequest"];
+                "multipart/form-data": components["schemas"]["PatchedShipmentEditRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Shipment"];
+                };
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Shipment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    shipments_resend_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Shipment. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SmsDispatch"];
+                };
+            };
+            /** @description No previous dispatch to resend */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Active dispatch already exists today */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cooldown active */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    sms_dispatches_list: {
+        parameters: {
+            query?: {
+                carrier?: string;
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+                shipment?: string;
+                /**
+                 * @description * `PENDING` - Pending
+                 *     * `SENT` - Sent
+                 *     * `DELIVERED` - Delivered
+                 *     * `FAILED` - Failed
+                 *     * `SIGNED` - Signed
+                 *     * `EXPIRED` - Expired
+                 *     * `CANCELLED` - Cancelled
+                 */
+                status?: "CANCELLED" | "DELIVERED" | "EXPIRED" | "FAILED" | "PENDING" | "SENT" | "SIGNED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSmsDispatchList"];
+                };
+            };
+        };
+    };
+    sms_dispatches_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este SMS dispatch. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SmsDispatch"];
+                };
+            };
+        };
+    };
+    sms_webhook_labsmobile_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    subid?: string;
+                    message_id?: string;
+                    msisdn?: string;
+                    status?: string;
+                    reason?: string;
+                    timestamp?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Callback processed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing provider_message_id */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid HMAC signature */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Dispatch not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

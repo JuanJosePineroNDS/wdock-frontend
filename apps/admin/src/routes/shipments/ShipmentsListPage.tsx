@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatIsoDate } from '@wdock/shared/utils';
 
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useShipments, type ShipmentStatus } from '@/features/shipments/hooks';
 import { SHIPMENT_STATUS_LABELS, ShipmentStatusBadge } from './StatusBadge';
+import { ShipmentActions } from './ShipmentActions';
 
 const STATUS_OPTIONS: { value: ShipmentStatus | ''; label: string }[] = [
   { value: '', label: 'Todos los estados' },
@@ -21,27 +22,24 @@ export function ShipmentsListPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ShipmentStatus | ''>('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   const { data, isLoading, isError, error } = useShipments({
     search: search || undefined,
+    status: statusFilter || undefined,
+    scheduled_date_from: fromDate || undefined,
+    scheduled_date_to: toDate || undefined,
     ordering: '-scheduled_date',
   });
-
-  const filtered = useMemo(() => {
-    if (!data) return [];
-    return data.results.filter((row) => {
-      if (statusFilter && row.status !== statusFilter) return false;
-      if (dateFilter && row.scheduled_date !== dateFilter) return false;
-      return true;
-    });
-  }, [data, statusFilter, dateFilter]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Albaranes</h1>
-        <p className="text-sm text-muted-foreground">Listado de albaranes importados.</p>
+        <p className="text-sm text-muted-foreground">
+          Listado de salidas. Inicia, reenvía, edita o cancela envíos desde las acciones por fila.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4">
@@ -74,15 +72,26 @@ export function ShipmentsListPage() {
             ))}
           </select>
         </div>
-        <div className="w-48 space-y-1">
-          <label className="text-xs font-medium text-slate-600" htmlFor="shipments-date">
-            Fecha programada
+        <div className="w-44 space-y-1">
+          <label className="text-xs font-medium text-slate-600" htmlFor="shipments-from">
+            Desde
           </label>
           <Input
-            id="shipments-date"
+            id="shipments-from"
             type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </div>
+        <div className="w-44 space-y-1">
+          <label className="text-xs font-medium text-slate-600" htmlFor="shipments-to">
+            Hasta
+          </label>
+          <Input
+            id="shipments-to"
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
           />
         </div>
       </div>
@@ -100,7 +109,7 @@ export function ShipmentsListPage() {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </div>
-      ) : filtered.length > 0 ? (
+      ) : data && data.results.length > 0 ? (
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
@@ -108,28 +117,34 @@ export function ShipmentsListPage() {
                 <th className="px-4 py-3">Albarán</th>
                 <th className="px-4 py-3">Fecha</th>
                 <th className="px-4 py-3">Transportista</th>
-                <th className="px-4 py-3">Teléfono</th>
                 <th className="px-4 py-3">Mercancía</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filtered.map((row) => (
+              {data.results.map((row) => (
                 <tr
                   key={row.id}
-                  className="cursor-pointer transition-colors hover:bg-slate-50"
-                  onClick={() => navigate(`/shipments/${row.id}`)}
+                  className="transition-colors hover:bg-slate-50"
                   data-testid="shipments-row"
                 >
-                  <td className="px-4 py-3 font-medium text-slate-900">{row.crm_external_id}</td>
+                  <td
+                    className="cursor-pointer px-4 py-3 font-medium text-slate-900"
+                    onClick={() => navigate(`/shipments/${row.id}`)}
+                  >
+                    {row.crm_external_id}
+                  </td>
                   <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                     {formatIsoDate(row.scheduled_date)}
                   </td>
                   <td className="px-4 py-3 text-slate-700">{row.expected_carrier_name}</td>
-                  <td className="px-4 py-3 text-slate-700">{row.expected_carrier_phone}</td>
                   <td className="px-4 py-3 text-slate-700">{row.cargo_description}</td>
                   <td className="px-4 py-3">
                     <ShipmentStatusBadge status={row.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <ShipmentActions shipment={row} compact />
                   </td>
                 </tr>
               ))}

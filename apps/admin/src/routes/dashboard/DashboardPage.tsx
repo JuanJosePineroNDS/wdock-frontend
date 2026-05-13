@@ -7,6 +7,9 @@ import { useImports } from '@/features/imports/hooks';
 import { ImportStatusBadge } from '@/routes/imports/StatusBadge';
 import { useShipments } from '@/features/shipments/hooks';
 import { useCarriers } from '@/features/carriers/hooks';
+import { useSmsDispatches } from '@/features/sms-dispatches/hooks';
+import { useActivityLog } from '@/features/activity-log/hooks';
+import { humanAction, humanResource } from '@/lib/audit-translations';
 import { useAuthStore } from '@/stores/authStore';
 
 function todayIso(): string {
@@ -16,60 +19,67 @@ function todayIso(): string {
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const today = todayIso();
-  const shipmentsQuery = useShipments();
-  const carriersQuery = useCarriers();
-  const importsQuery = useImports();
 
-  const pendingToday =
-    shipmentsQuery.data?.results.filter(
-      (s) => s.scheduled_date === today && s.status === 'PROGRAMMED',
-    ).length ?? 0;
-  const carriersTotal = carriersQuery.data?.count ?? 0;
+  const todayShipments = useShipments({
+    scheduled_date: today,
+    status: 'PROGRAMMED',
+  });
+  const inProcessSms = useSmsDispatches({ status: 'SENT' });
+  const failedSms = useSmsDispatches({ status: 'FAILED' });
+  const activeCarriers = useCarriers({ active: true });
+  const importsQuery = useImports();
+  const recentActivity = useActivityLog({ ordering: '-timestamp' });
+
+  const pendingToday = todayShipments.data?.count ?? todayShipments.data?.results.length ?? 0;
+  const inProcessCount = inProcessSms.data?.count ?? inProcessSms.data?.results.length ?? 0;
+  const failedCount = failedSms.data?.count ?? failedSms.data?.results.length ?? 0;
+  const activeCarriersTotal = activeCarriers.data?.count ?? activeCarriers.data?.results.length ?? 0;
   const latestImport = importsQuery.data?.results[0];
+  const latestActivity = recentActivity.data?.results.slice(0, 3) ?? [];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Bienvenido a WDock Admin</h1>
         <p className="text-sm text-muted-foreground">
-          Panel de control para administradores y operadores internos.
+          Panel operacional del día. Salidas, envíos y actividad del tenant.
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Link to="/shipments" className="block">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="text-base">Albaranes pendientes hoy</CardTitle>
-              <CardDescription>Programados para {today} sin firmar.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {shipmentsQuery.isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <p className="text-3xl font-semibold text-slate-900" data-testid="stat-pending-today">
-                  {pendingToday}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-        <Link to="/carriers" className="block">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="text-base">Transportistas</CardTitle>
-              <CardDescription>Total registrados en el tenant.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {carriersQuery.isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                <p className="text-3xl font-semibold text-slate-900" data-testid="stat-carriers-total">
-                  {carriersTotal}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <StatCard
+          to="/shipments"
+          title="Salidas programadas hoy"
+          description={`Estado PROGRAMMED para ${today}.`}
+          value={pendingToday}
+          loading={todayShipments.isLoading}
+          testid="stat-pending-today"
+        />
+        <StatCard
+          to="/shipments"
+          title="Envíos SMS en curso"
+          description="Estado SENT esperando confirmación."
+          value={inProcessCount}
+          loading={inProcessSms.isLoading}
+          tone="warn"
+          testid="stat-sms-in-process"
+        />
+        <StatCard
+          to="/activity-log"
+          title="Envíos SMS fallidos"
+          description="Requieren revisión manual."
+          value={failedCount}
+          loading={failedSms.isLoading}
+          tone="error"
+          testid="stat-sms-failed"
+        />
+        <StatCard
+          to="/carriers"
+          title="Transportistas activos"
+          description="Total en el tenant."
+          value={activeCarriersTotal}
+          loading={activeCarriers.isLoading}
+          testid="stat-carriers-active"
+        />
         <Link to="/imports" className="block">
           <Card className="h-full transition-shadow hover:shadow-md">
             <CardHeader>
@@ -97,6 +107,39 @@ export function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
+        <Card className="md:col-span-2 xl:col-span-3">
+          <CardHeader>
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <CardTitle className="text-base">Actividad reciente</CardTitle>
+                <CardDescription>Las 3 últimas acciones del tenant.</CardDescription>
+              </div>
+              <Link to="/activity-log" className="text-sm text-primary hover:underline">
+                Ver historial completo
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {recentActivity.isLoading ? (
+              <Skeleton className="h-16 w-full" />
+            ) : latestActivity.length > 0 ? (
+              <ul className="divide-y divide-slate-100">
+                {latestActivity.map((entry) => (
+                  <li key={entry.id} className="py-2 text-sm">
+                    <p className="font-medium text-slate-900">{humanAction(entry.accion)}</p>
+                    <p className="text-xs text-slate-500">
+                      {humanResource(entry.recurso_tipo)} ·{' '}
+                      {entry.user_email || entry.actor_externo || 'Sistema'} ·{' '}
+                      {formatIsoDateTime(entry.timestamp)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-slate-500">Sin actividad registrada todavía.</p>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Tu sesión</CardTitle>
@@ -127,5 +170,54 @@ export function DashboardPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+interface StatCardProps {
+  to: string;
+  title: string;
+  description: string;
+  value: number;
+  loading: boolean;
+  tone?: 'default' | 'warn' | 'error';
+  testid?: string;
+}
+
+function StatCard({
+  to,
+  title,
+  description,
+  value,
+  loading,
+  tone = 'default',
+  testid,
+}: StatCardProps) {
+  const toneClass =
+    tone === 'warn'
+      ? 'text-amber-600'
+      : tone === 'error'
+        ? value > 0
+          ? 'text-red-600'
+          : 'text-slate-900'
+        : 'text-slate-900';
+
+  return (
+    <Link to={to} className="block">
+      <Card className="h-full transition-shadow hover:shadow-md">
+        <CardHeader>
+          <CardTitle className="text-base">{title}</CardTitle>
+          <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <Skeleton className="h-8 w-16" />
+          ) : (
+            <p className={`text-3xl font-semibold ${toneClass}`} data-testid={testid}>
+              {value}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

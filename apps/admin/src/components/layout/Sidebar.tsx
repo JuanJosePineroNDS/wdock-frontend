@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FileText, LayoutDashboard, Package, Truck, Upload, Users } from 'lucide-react';
+import { Activity, FileText, LayoutDashboard, Package, Truck, Upload, Users } from 'lucide-react';
 import { cn } from '@wdock/shared/utils';
 
 const items = [
@@ -7,6 +7,7 @@ const items = [
   { to: '/imports', label: 'Imports', icon: Upload },
   { to: '/shipments', label: 'Albaranes', icon: Package },
   { to: '/carriers', label: 'Transportistas', icon: Truck },
+  { to: '/activity-log', label: 'Historial', icon: Activity },
   { to: '/documents', label: 'Documentos', icon: FileText },
   { to: '/users', label: 'Usuarios', icon: Users },
 ];
