@@ -7,6 +7,10 @@ import { DashboardPage } from './dashboard/DashboardPage';
 import { ImportsListPage } from './imports/ImportsListPage';
 import { ImportUploadPage } from './imports/ImportUploadPage';
 import { ImportDetailPage } from './imports/ImportDetailPage';
+import { ShipmentsListPage } from './shipments/ShipmentsListPage';
+import { ShipmentDetailPage } from './shipments/ShipmentDetailPage';
+import { CarriersListPage } from './carriers/CarriersListPage';
+import { CarrierDetailPage } from './carriers/CarrierDetailPage';
 
 export function AppRoutes() {
   return (
@@ -19,6 +23,10 @@ export function AppRoutes() {
           <Route path="/imports" element={<ImportsListPage />} />
           <Route path="/imports/new" element={<ImportUploadPage />} />
           <Route path="/imports/:id" element={<ImportDetailPage />} />
+          <Route path="/shipments" element={<ShipmentsListPage />} />
+          <Route path="/shipments/:id" element={<ShipmentDetailPage />} />
+          <Route path="/carriers" element={<CarriersListPage />} />
+          <Route path="/carriers/:id" element={<CarrierDetailPage />} />
           <Route path="/documents" element={<DocumentsPlaceholder />} />
           <Route path="/users" element={<UsersPlaceholder />} />
         </Route>

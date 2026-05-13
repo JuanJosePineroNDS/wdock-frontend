@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
+import { render, type RenderResult } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
@@ -8,6 +8,8 @@ export interface RenderWithProvidersOptions {
   path?: string;
   extraRoutes?: ReactNode;
 }
+
+export type RenderWithProvidersResult = RenderResult & { queryClient: QueryClient };
 
 export function createTestQueryClient(): QueryClient {
   return new QueryClient({
@@ -27,7 +29,7 @@ export function createTestQueryClient(): QueryClient {
 export function renderWithProviders(
   ui: ReactElement,
   options: RenderWithProvidersOptions = {},
-) {
+): RenderWithProvidersResult {
   const { initialPath = '/', path = '/', extraRoutes } = options;
   const queryClient = createTestQueryClient();
   return {
