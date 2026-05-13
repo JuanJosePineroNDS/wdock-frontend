@@ -11,6 +11,7 @@ import { ShipmentsListPage } from './shipments/ShipmentsListPage';
 import { ShipmentDetailPage } from './shipments/ShipmentDetailPage';
 import { CarriersListPage } from './carriers/CarriersListPage';
 import { CarrierDetailPage } from './carriers/CarrierDetailPage';
+import { ActivityLogPage } from './activity-log/ActivityLogPage';
 
 export function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ export function AppRoutes() {
           <Route path="/shipments/:id" element={<ShipmentDetailPage />} />
           <Route path="/carriers" element={<CarriersListPage />} />
           <Route path="/carriers/:id" element={<CarrierDetailPage />} />
+          <Route path="/activity-log" element={<ActivityLogPage />} />
           <Route path="/documents" element={<DocumentsPlaceholder />} />
           <Route path="/users" element={<UsersPlaceholder />} />
         </Route>
