@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev:admin": "pnpm --filter @wdock/admin dev",
+    "dev:signing": "pnpm --filter @wdock/signing dev",
     "build": "pnpm -r build",
     "build:api-client": "pnpm --filter @wdock/api-client build",
     "test": "pnpm -r test",
