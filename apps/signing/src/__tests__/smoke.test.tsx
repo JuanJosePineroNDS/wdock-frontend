@@ -13,6 +13,6 @@ describe('signing app smoke', () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getByText(/invalid token/i)).toBeInTheDocument();
+    expect(screen.getByText(/enlace no válido/i)).toBeInTheDocument();
   });
 });
