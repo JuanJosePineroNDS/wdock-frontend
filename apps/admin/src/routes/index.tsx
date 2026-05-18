@@ -13,6 +13,7 @@ import { CarriersListPage } from './carriers/CarriersListPage';
 import { CarrierDetailPage } from './carriers/CarrierDetailPage';
 import { ActivityLogPage } from './activity-log/ActivityLogPage';
 import { ProfilePage } from './profile/ProfilePage';
+import { UsersPage } from './users/UsersPage';
 
 export function AppRoutes() {
   return (
@@ -32,7 +33,7 @@ export function AppRoutes() {
           <Route path="/activity-log" element={<ActivityLogPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/documents" element={<DocumentsPlaceholder />} />
-          <Route path="/users" element={<UsersPlaceholder />} />
+          <Route path="/users" element={<UsersPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
@@ -49,11 +50,3 @@ function DocumentsPlaceholder() {
   );
 }
 
-function UsersPlaceholder() {
-  return (
-    <div>
-      <h1 className="text-xl font-semibold">Usuarios</h1>
-      <p className="text-sm text-muted-foreground">Funcionalidad en migración a WDock v2.</p>
-    </div>
-  );
-}
