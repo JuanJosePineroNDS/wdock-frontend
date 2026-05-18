@@ -13,6 +13,7 @@ describe('useAuth', () => {
       user: {
         id: 'u',
         email: 'a@b.c',
+        full_name: 'Test User',
         role: 'ADMIN',
         is_active_in_tenant: true,
         is_staff: true,
