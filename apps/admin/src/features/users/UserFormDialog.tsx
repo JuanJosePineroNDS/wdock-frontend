@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import {
+  ROLE_OPTIONS,
   useCreateUser,
   useUpdateUser,
   type AuthRole,
@@ -23,15 +24,6 @@ import {
 } from './hooks';
 
 type Mode = 'create' | 'edit';
-
-export const ROLE_OPTIONS: ReadonlyArray<{ value: AuthRole; label: string }> = [
-  { value: 'SUPERADMIN', label: 'Superadmin' },
-  { value: 'ADMIN', label: 'Administrador' },
-  { value: 'OPERADOR', label: 'Operador' },
-  { value: 'INTEGRACION_ERP', label: 'Integración ERP' },
-  { value: 'AUDITOR', label: 'Auditor' },
-  { value: 'SOLO_LECTURA', label: 'Sólo lectura' },
-];
 
 export interface UserFormDialogProps {
   open: boolean;

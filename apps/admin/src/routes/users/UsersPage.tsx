@@ -10,12 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthStore } from '@/stores/authStore';
 import {
+  ROLE_OPTIONS,
   useActivateUser,
   useDeactivateUser,
   useUsers,
   type UserListItem,
 } from '@/features/users/hooks';
-import { ROLE_OPTIONS, UserFormDialog } from '@/features/users/UserFormDialog';
+import { UserFormDialog } from '@/features/users/UserFormDialog';
 import { ResetPasswordDialog } from '@/features/users/ResetPasswordDialog';
 
 function roleLabel(role: string): string {

@@ -13,6 +13,16 @@ export type PatchedUserUpdateRequest = components['schemas']['PatchedUserUpdateR
 export type ResetPasswordRequest = components['schemas']['ResetPasswordRequest'];
 export type AuthRole = components['schemas']['AuthRole'];
 
+/** Human-readable labels for the six AuthRole values from the backend. */
+export const ROLE_OPTIONS: ReadonlyArray<{ value: AuthRole; label: string }> = [
+  { value: 'SUPERADMIN', label: 'Superadmin' },
+  { value: 'ADMIN', label: 'Administrador' },
+  { value: 'OPERADOR', label: 'Operador' },
+  { value: 'INTEGRACION_ERP', label: 'Integración ERP' },
+  { value: 'AUDITOR', label: 'Auditor' },
+  { value: 'SOLO_LECTURA', label: 'Sólo lectura' },
+];
+
 export interface UseUsersParams {
   page?: number;
   search?: string;
