@@ -18,22 +18,22 @@ const KNOWN_ENTRY = {
   tenant: 't',
   user: 'u1',
   user_email: 'admin@wdock.local',
-  actor_externo: '',
-  accion: 'carrier.created',
-  recurso_tipo: 'Carrier',
-  recurso_id: 'c1',
-  ip_origen: '127.0.0.1',
+  external_actor: '',
+  action: 'carrier.created',
+  resource_type: 'Carrier',
+  resource_id: 'c1',
+  ip_origin: '127.0.0.1',
   user_agent: 'Mozilla/5.0',
   metadata: { dni: '12345678Z' },
   timestamp: new Date(Date.now() - 60_000).toISOString(),
-  hash_anterior: '',
-  hash_actual: 'h1',
+  hash_previous: '',
+  hash_current: 'h1',
 };
 
 const UNKNOWN_ENTRY = {
   ...KNOWN_ENTRY,
   id: 'a2',
-  accion: 'mystery.action',
+  action: 'mystery.action',
   metadata: null,
   timestamp: new Date(Date.now() - 3_600_000).toISOString(),
 };
@@ -76,7 +76,7 @@ describe('ActivityLogPage', () => {
 
     await waitFor(() => {
       const lastCall = mockApi.GET.mock.calls.at(-1);
-      expect(lastCall?.[1]?.params?.query?.accion).toBe('carrier.created');
+      expect(lastCall?.[1]?.params?.query?.action).toBe('carrier.created');
     });
   });
 });

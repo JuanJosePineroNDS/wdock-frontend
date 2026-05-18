@@ -9,9 +9,9 @@ export type PaginatedActivityLogList = components['schemas']['PaginatedActivityL
 
 export interface UseActivityLogParams {
   page?: number;
-  accion?: string;
-  recurso_tipo?: string;
-  recurso_id?: string;
+  action?: string;
+  resource_type?: string;
+  resource_id?: string;
   user_id?: string;
   from_date?: string;
   to_date?: string;
@@ -28,9 +28,9 @@ export function useActivityLog(params: UseActivityLogParams = {}) {
         params: {
           query: {
             page: params.page,
-            accion: params.accion,
-            recurso_tipo: params.recurso_tipo,
-            recurso_id: params.recurso_id,
+            action: params.action,
+            resource_type: params.resource_type,
+            resource_id: params.resource_id,
             user_id: params.user_id,
             from_date: params.from_date,
             to_date: params.to_date,

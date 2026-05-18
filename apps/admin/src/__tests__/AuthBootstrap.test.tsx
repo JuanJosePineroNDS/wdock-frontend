@@ -43,12 +43,12 @@ function freshTokens() {
 const fakeUser = {
   id: 'u1',
   email: 'admin@wdock.com',
-  rol: 'ADMIN' as const,
-  activo: true,
+  role: 'ADMIN' as const,
+  is_active_in_tenant: true,
   is_staff: true,
   tenant_id: 't1',
-  tenant_nombre: 'Demo',
-  ultimo_login: null,
+  tenant_name: 'Demo',
+  last_login_at: null,
 };
 
 function renderBootstrap() {
