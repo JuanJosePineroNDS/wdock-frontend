@@ -107,6 +107,30 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /**
+         * Update the authenticated user's profile
+         * @description Only the editable subset of the profile is accepted (currently ``full_name``). Email and role are not editable here; they live behind admin endpoints.
+         */
+        patch: operations["auth_me_update"];
+        trace?: never;
+    };
+    "/api/v1/auth/me/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the authenticated user's password
+         * @description Requires ``current_password`` to match and a ``new_password`` of at least 8 characters. On success the user keeps the current JWT tokens (they are not auto-revoked).
+         */
+        post: operations["auth_change_password"];
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -803,6 +827,135 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        get: operations["users_list"];
+        put?: never;
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        post: operations["users_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        get: operations["users_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        patch: operations["users_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/activate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        post: operations["users_activate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/deactivate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        post: operations["users_deactivate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/reset-password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description User management for the authenticated user's tenant.
+         *
+         *     Restricted to ``SUPERADMIN``. ``DELETE`` is not exposed — accounts are
+         *     deactivated via the ``deactivate`` action, preserving foreign keys and
+         *     audit history.
+         */
+        post: operations["users_reset_password_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -893,6 +1046,11 @@ export interface components {
             /** @description List of vehicle license plates associated with this carrier. */
             license_plates?: unknown;
             notes?: string;
+        };
+        /** @description Body of ``POST /api/v1/auth/me/change-password``. */
+        ChangePasswordRequest: {
+            current_password: string;
+            new_password: string;
         };
         /** @description Body of ``POST /api/v1/documents``. */
         DocumentCreateRequest: {
@@ -1004,6 +1162,7 @@ export interface components {
             readonly id: string;
             /** Format: email */
             readonly email: string;
+            readonly full_name: string;
             /**
              * @description Tenant-wide role for the current user.
              *
@@ -1137,6 +1296,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["SmsDispatch"][];
         };
+        PaginatedUserListList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["UserList"][];
+        };
         /**
          * @description Write-side serializer used for POST and PATCH on the Carrier viewset.
          *
@@ -1153,6 +1327,16 @@ export interface components {
             /** @description List of vehicle license plates associated with this carrier. */
             license_plates?: unknown;
             notes?: string;
+        };
+        /**
+         * @description Body of ``PATCH /api/v1/auth/me`` — only ``full_name`` is editable here.
+         *
+         *     Email and role are intentionally not exposed: email is identity (must be
+         *     changed by an admin in a future PR), and role can only be changed by a
+         *     SUPERADMIN via ``/users/{id}/``.
+         */
+        PatchedMeUpdateRequest: {
+            full_name?: string;
         };
         /**
          * @description Write-side serializer for the ``/shipments/{id}/edit/`` action.
@@ -1173,6 +1357,16 @@ export interface components {
             scheduled_date?: string;
             /** @description Free-form operator notes. Not shown to the carrier. */
             notes?: string;
+        };
+        /**
+         * @description Body of ``PATCH /api/v1/users/{id}`` — limited subset.
+         *
+         *     Email is identity and cannot be edited here. Password changes are routed
+         *     through the dedicated ``reset-password`` action.
+         */
+        PatchedUserUpdateRequest: {
+            full_name?: string;
+            role?: components["schemas"]["AuthRole"];
         };
         /**
          * @description RFC 7807 Problem Details envelope used by every error response.
@@ -1204,6 +1398,10 @@ export interface components {
             access: string;
             /** @description Rotated refresh JWT (only when ``ROTATE_REFRESH_TOKENS=True``). Replace the previous refresh in the client store. */
             refresh?: string;
+        };
+        /** @description Body of ``POST /api/v1/users/{id}/reset-password``. */
+        ResetPasswordRequest: {
+            new_password: string;
         };
         /** @description Read-only representation of a shipment. */
         Shipment: {
@@ -1349,6 +1547,47 @@ export interface components {
          * @enum {string}
          */
         SmsDispatchStatusEnum: "PENDING" | "SENT" | "DELIVERED" | "FAILED" | "SIGNED" | "EXPIRED" | "CANCELLED";
+        /** @description Body of ``POST /api/v1/users`` — tenant scoped by the view. */
+        UserCreate: {
+            /** Format: email */
+            email: string;
+            full_name?: string;
+            role?: components["schemas"]["AuthRole"];
+        };
+        /** @description Body of ``POST /api/v1/users`` — tenant scoped by the view. */
+        UserCreateRequest: {
+            /** Format: email */
+            email: string;
+            full_name?: string;
+            role?: components["schemas"]["AuthRole"];
+            password: string;
+        };
+        /** @description Read-only representation of a user in the tenant. */
+        UserList: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string;
+            readonly full_name: string;
+            readonly role: components["schemas"]["AuthRole"];
+            readonly is_active_in_tenant: boolean;
+            readonly is_active: boolean;
+            readonly is_staff: boolean;
+            /** Format: date-time */
+            readonly last_login_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /**
+         * @description Body of ``PATCH /api/v1/users/{id}`` — limited subset.
+         *
+         *     Email is identity and cannot be edited here. Password changes are routed
+         *     through the dedicated ``reset-password`` action.
+         */
+        UserUpdate: {
+            full_name?: string;
+            role?: components["schemas"]["AuthRole"];
+        };
     };
     responses: never;
     parameters: never;
@@ -1503,6 +1742,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Bearer access token missing or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_me_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMeUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedMeUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedMeUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+            /** @description Validation error. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Bearer access token missing or expired. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
+    };
+    auth_change_password: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChangePasswordRequest"];
+                "multipart/form-data": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password changed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Current password incorrect or new password invalid. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
                 };
             };
             /** @description Bearer access token missing or expired. */
@@ -2584,6 +2908,206 @@ export interface operations {
             };
             /** @description Dispatch not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    users_list: {
+        parameters: {
+            query?: {
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedUserListList"];
+                };
+            };
+        };
+    };
+    users_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserCreateRequest"];
+                "multipart/form-data": components["schemas"]["UserCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserCreate"];
+                };
+            };
+        };
+    };
+    users_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Usuario. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserList"];
+                };
+            };
+        };
+    };
+    users_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Usuario. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUserUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedUserUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedUserUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserUpdate"];
+                };
+            };
+        };
+    };
+    users_activate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Usuario. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserList"];
+                };
+            };
+            /** @description User already active. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    users_deactivate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Usuario. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserList"];
+                };
+            };
+            /** @description Cannot deactivate yourself. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User already deactivated. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    users_reset_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Usuario. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ResetPasswordRequest"];
+                "multipart/form-data": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password reset. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description New password invalid. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
