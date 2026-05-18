@@ -1,24 +1,42 @@
 import { NavLink } from 'react-router-dom';
-import { Activity, FileText, LayoutDashboard, Package, Truck, Upload, Users } from 'lucide-react';
+import { Activity, LayoutDashboard, Package, Truck, Upload, Users } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 import { cn } from '@wdock/shared/utils';
 
-const items = [
+import { useAuthStore } from '@/stores/authStore';
+
+interface NavItem {
+  to: string;
+  label: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  /** When set, the entry is only visible if the current user has this role. */
+  requiredRole?: 'SUPERADMIN';
+}
+
+const items: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/imports', label: 'Imports', icon: Upload },
   { to: '/shipments', label: 'Albaranes', icon: Package },
   { to: '/carriers', label: 'Transportistas', icon: Truck },
   { to: '/activity-log', label: 'Historial', icon: Activity },
-  { to: '/documents', label: 'Documentos', icon: FileText },
-  { to: '/users', label: 'Usuarios', icon: Users },
+  // TODO: "Documentos" se reincorporará cuando exista una vista dedicada en v2.
+  // Mientras tanto la funcionalidad vive integrada en cada Albarán (signed PDF,
+  // historial de dispatches). La ruta /documents sigue montada para no romper
+  // bookmarks; muestra el placeholder existente.
+  // { to: '/documents', label: 'Documentos', icon: FileText },
+  { to: '/users', label: 'Usuarios', icon: Users, requiredRole: 'SUPERADMIN' },
 ];
 
 export function Sidebar() {
+  const role = useAuthStore((state) => state.user?.role);
+  const visibleItems = items.filter((item) => !item.requiredRole || item.requiredRole === role);
+
   return (
     <aside className="flex w-56 flex-col border-r border-slate-200 bg-white">
       <div className="px-6 py-5 text-lg font-semibold tracking-tight text-slate-900">WDock</div>
       <nav className="flex-1 px-3 pb-4">
         <ul className="space-y-1">
-          {items.map(({ to, label, icon: Icon }) => (
+          {visibleItems.map(({ to, label, icon: Icon }) => (
             <li key={to}>
               <NavLink
                 to={to}
