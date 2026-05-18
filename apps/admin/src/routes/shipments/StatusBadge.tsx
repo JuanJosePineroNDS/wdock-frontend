@@ -4,7 +4,10 @@ import type { ShipmentStatus } from '@/features/shipments/hooks';
 
 const STATUS_LABEL: Record<ShipmentStatus, string> = {
   PROGRAMMED: 'Programado',
-  IN_PROCESS: 'En curso',
+  // After the backend bug fix, an SMS dispatch transitions the Shipment to
+  // IN_PROCESS. The label tells the operator what they are waiting for —
+  // not just that "something is happening".
+  IN_PROCESS: 'Pendiente firma',
   SIGNED: 'Firmado',
   EXPIRED: 'Caducado',
   CANCELLED: 'Cancelado',
@@ -12,9 +15,9 @@ const STATUS_LABEL: Record<ShipmentStatus, string> = {
 
 const STATUS_CLASS: Record<ShipmentStatus, string> = {
   PROGRAMMED: 'bg-slate-100 text-slate-700 border-slate-200',
-  IN_PROCESS: 'bg-blue-50 text-blue-700 border-blue-200',
+  IN_PROCESS: 'bg-amber-50 text-amber-700 border-amber-200',
   SIGNED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  EXPIRED: 'bg-amber-50 text-amber-700 border-amber-200',
+  EXPIRED: 'bg-orange-50 text-orange-700 border-orange-200',
   CANCELLED: 'bg-red-50 text-red-700 border-red-200',
 };
 
