@@ -645,6 +645,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/sign/{token}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Public signing endpoint. GET returns the minimal shipment summary the carrier needs to confirm and sign. POST receives the signature image plus legal-evidence metadata. */
+        get: operations["sign_retrieve"];
+        put?: never;
+        /** @description Public signing endpoint. GET returns the minimal shipment summary the carrier needs to confirm and sign. POST receives the signature image plus legal-evidence metadata. */
+        post: operations["sign_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/signatures/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Read-only Signature endpoints for the operator panel.
+         *
+         *     The ``download`` action returns a short-lived presigned URL for the
+         *     signed PDF stored in the evidences S3 bucket.
+         */
+        get: operations["signatures_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/signatures/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Read-only Signature endpoints for the operator panel.
+         *
+         *     The ``download`` action returns a short-lived presigned URL for the
+         *     signed PDF stored in the evidences S3 bucket.
+         */
+        get: operations["signatures_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/signatures/{id}/download/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Return a short-lived presigned URL to the signed PDF. */
+        get: operations["signatures_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sms-dispatches/": {
         parameters: {
             query?: never;
@@ -1028,6 +1107,21 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Shipment"][];
         };
+        PaginatedSignatureList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Signature"][];
+        };
         PaginatedSmsDispatchList: {
             /** @example 123 */
             count: number;
@@ -1160,6 +1254,49 @@ export interface components {
          * @enum {string}
          */
         ShipmentStatusEnum: "PROGRAMMED" | "IN_PROCESS" | "SIGNED" | "EXPIRED" | "CANCELLED";
+        /** @description Read-only representation of a Signature for the operator panel. */
+        Signature: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly sms_dispatch: string;
+            /**
+             * Format: uuid
+             * @description Denormalized from the parent shipment for tenant-scoped queries.
+             */
+            readonly tenant: string;
+            /** @description DNI/NIE introduced by the carrier at signing time. */
+            readonly signer_dni: string;
+            /** @description S3 key of the PNG of the handwritten signature stroke. */
+            readonly signature_image_s3_key: string;
+            /** @description S3 key of the generated signed PDF (filled by the Celery task). */
+            readonly signed_pdf_s3_key: string;
+            readonly ip_address: string | null;
+            readonly user_agent: string;
+            /** @description Optional {lat, lng, accuracy} captured if the browser allowed it. */
+            readonly geolocation: unknown;
+            readonly status: components["schemas"]["SignatureStatusEnum"];
+            /** @description SHA-256 of (dispatch_id, DNI, IP, UA, signed_at, geolocation). */
+            readonly evidence_hash: string;
+            /** Format: date-time */
+            readonly signed_at: string;
+            /** Format: date-time */
+            readonly pdf_generated_at: string | null;
+            /** Format: date-time */
+            readonly notification_sent_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly shipment_external_id: string;
+            readonly carrier_name: string;
+        };
+        /**
+         * @description * `RECEIVED` - Received
+         *     * `PDF_GENERATED` - PDF Generated
+         *     * `NOTIFIED` - Notified
+         *     * `FAILED` - Failed
+         * @enum {string}
+         */
+        SignatureStatusEnum: "RECEIVED" | "PDF_GENERATED" | "NOTIFIED" | "FAILED";
         /** @description Read-only representation of an SMS dispatch. */
         SmsDispatch: {
             /** Format: uuid */
@@ -2185,6 +2322,162 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    sign_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    sign_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    signatures_list: {
+        parameters: {
+            query?: {
+                /** @description Qué campo usar para ordenar los resultados. */
+                ordering?: string;
+                /** @description Un número de página dentro del conjunto de resultados paginado. */
+                page?: number;
+                /** @description Un término de búsqueda. */
+                search?: string;
+                sms_dispatch?: string;
+                /**
+                 * @description * `RECEIVED` - Received
+                 *     * `PDF_GENERATED` - PDF Generated
+                 *     * `NOTIFIED` - Notified
+                 *     * `FAILED` - Failed
+                 */
+                status?: "FAILED" | "NOTIFIED" | "PDF_GENERATED" | "RECEIVED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSignatureList"];
+                };
+            };
+        };
+    };
+    signatures_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Signature. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Signature"];
+                };
+            };
+        };
+    };
+    signatures_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Un Cadena UUID que identifique este Signature. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Signature"];
+                };
             };
         };
     };
