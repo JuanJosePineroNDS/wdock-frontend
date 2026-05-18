@@ -1,0 +1,53 @@
+# Claude Code agents (personal tooling, not versioned)
+.claude/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Misc
+*.bak
+*.tmp
+.cache/
+
+# Note: archivos generados en packages/api-client/src/generated/ SI se commitean
+# para que el repo sea utilizable sin tener el backend corriendo.
