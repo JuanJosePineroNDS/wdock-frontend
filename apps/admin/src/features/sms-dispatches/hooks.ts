@@ -62,7 +62,12 @@ export function useSmsDispatch(id: string | undefined, options: UseSmsDispatchOp
   const client = useApiClient();
   const pollingIntervalMs = options.pollingIntervalMs ?? 5000;
 
-  const queryOptions: UseQueryOptions<SmsDispatch, Error, SmsDispatch, ['sms-dispatches', string | undefined]> = {
+  const queryOptions: UseQueryOptions<
+    SmsDispatch,
+    Error,
+    SmsDispatch,
+    ['sms-dispatches', string | undefined]
+  > = {
     queryKey: ['sms-dispatches', id],
     queryFn: async () => {
       if (!id) {

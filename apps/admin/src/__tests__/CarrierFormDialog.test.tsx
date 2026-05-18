@@ -37,9 +37,7 @@ describe('CarrierFormDialog', () => {
   it('shows inline validation errors and does not call the API when the DNI is invalid', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
-    renderWithProviders(
-      <CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />,
-    );
+    renderWithProviders(<CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />);
 
     await user.type(screen.getByTestId('carrier-dni'), '12345678A');
     await user.type(screen.getByTestId('carrier-name'), 'Tester');
@@ -65,9 +63,7 @@ describe('CarrierFormDialog', () => {
     });
 
     const onOpenChange = vi.fn();
-    renderWithProviders(
-      <CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />,
-    );
+    renderWithProviders(<CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />);
 
     await user.type(screen.getByTestId('carrier-dni'), '12345678Z');
     await user.type(screen.getByTestId('carrier-name'), 'Pedro Pérez');
@@ -106,9 +102,7 @@ describe('CarrierFormDialog', () => {
     });
 
     const onOpenChange = vi.fn();
-    renderWithProviders(
-      <CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />,
-    );
+    renderWithProviders(<CarrierFormDialog open mode="create" onOpenChange={onOpenChange} />);
 
     await user.type(screen.getByTestId('carrier-dni'), '12345678Z');
     await user.type(screen.getByTestId('carrier-name'), 'Pedro Pérez');

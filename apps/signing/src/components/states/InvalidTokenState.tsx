@@ -11,8 +11,8 @@ export function InvalidTokenState() {
         </div>
         <h1 className="text-lg font-semibold text-slate-900">Enlace no válido</h1>
         <p className="text-sm text-slate-600">
-          Comprueba que has abierto el enlace completo del SMS. Si el problema persiste, contacta con
-          quien te lo envió.
+          Comprueba que has abierto el enlace completo del SMS. Si el problema persiste, contacta
+          con quien te lo envió.
         </p>
       </div>
     </PageShell>

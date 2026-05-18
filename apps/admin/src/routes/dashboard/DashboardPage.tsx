@@ -33,7 +33,8 @@ export function DashboardPage() {
   const pendingToday = todayShipments.data?.count ?? todayShipments.data?.results.length ?? 0;
   const inProcessCount = inProcessSms.data?.count ?? inProcessSms.data?.results.length ?? 0;
   const failedCount = failedSms.data?.count ?? failedSms.data?.results.length ?? 0;
-  const activeCarriersTotal = activeCarriers.data?.count ?? activeCarriers.data?.results.length ?? 0;
+  const activeCarriersTotal =
+    activeCarriers.data?.count ?? activeCarriers.data?.results.length ?? 0;
   const latestImport = importsQuery.data?.results[0];
   const latestActivity = recentActivity.data?.results.slice(0, 3) ?? [];
 

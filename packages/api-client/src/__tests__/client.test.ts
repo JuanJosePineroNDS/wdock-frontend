@@ -147,9 +147,7 @@ describe('createApiClient', () => {
     expect(storage.getAccess()).toBe('new-access');
     expect(storage.getRefresh()).toBe('new-refresh');
     expect(onLogout).not.toHaveBeenCalled();
-    expect(result.data).toEqual(
-      expect.objectContaining({ id: 'u1', email: 'a@b.c' }),
-    );
+    expect(result.data).toEqual(expect.objectContaining({ id: 'u1', email: 'a@b.c' }));
     expect(calls[2].headers.get('Authorization')).toBe('Bearer new-access');
   });
 

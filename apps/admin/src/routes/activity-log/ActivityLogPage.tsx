@@ -15,11 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useActivityLog, type ActivityLog } from '@/features/activity-log/hooks';
-import {
-  ACTION_LABELS,
-  humanAction,
-  humanResource,
-} from '@/lib/audit-translations';
+import { ACTION_LABELS, humanAction, humanResource } from '@/lib/audit-translations';
 
 const ACTION_OPTIONS = [
   { value: '', label: 'Todas las acciones' },
@@ -227,7 +223,10 @@ function ActivityCard({ entry }: { entry: ActivityLog }) {
           </div>
           <div className="flex-1 space-y-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <span className="text-sm font-medium text-slate-900" data-testid="activity-action-label">
+              <span
+                className="text-sm font-medium text-slate-900"
+                data-testid="activity-action-label"
+              >
                 {humanAction(entry.action)}
               </span>
               {isUnknownAction && (

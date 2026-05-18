@@ -86,9 +86,7 @@ describe('DispatchDialog', () => {
     });
 
     const onOpenChange = vi.fn();
-    renderWithProviders(
-      <DispatchDialog open onOpenChange={onOpenChange} shipment={SHIPMENT} />,
-    );
+    renderWithProviders(<DispatchDialog open onOpenChange={onOpenChange} shipment={SHIPMENT} />);
 
     const option = await screen.findByTestId('dispatch-carrier-option');
     await user.click(option);
@@ -110,13 +108,15 @@ describe('DispatchDialog', () => {
     mockApi.POST.mockResolvedValue({
       data: undefined,
       error: { detail: 'duplicate' },
-      response: { status: 409, statusText: 'Conflict', clone: () => ({ json: async () => null }) } as unknown as Response,
+      response: {
+        status: 409,
+        statusText: 'Conflict',
+        clone: () => ({ json: async () => null }),
+      } as unknown as Response,
     });
 
     const onOpenChange = vi.fn();
-    renderWithProviders(
-      <DispatchDialog open onOpenChange={onOpenChange} shipment={SHIPMENT} />,
-    );
+    renderWithProviders(<DispatchDialog open onOpenChange={onOpenChange} shipment={SHIPMENT} />);
 
     const option = await screen.findByTestId('dispatch-carrier-option');
     await user.click(option);

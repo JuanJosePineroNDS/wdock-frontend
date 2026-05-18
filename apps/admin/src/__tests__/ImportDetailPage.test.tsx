@@ -62,12 +62,11 @@ describe('ImportDetailPage', () => {
   });
 
   it('polls while the import is processing and stops once completed', async () => {
-    mockApi.GET
-      .mockResolvedValueOnce({
-        data: processingImport(),
-        error: undefined,
-        response: { status: 200 } as Response,
-      })
+    mockApi.GET.mockResolvedValueOnce({
+      data: processingImport(),
+      error: undefined,
+      response: { status: 200 } as Response,
+    })
       .mockResolvedValueOnce({
         data: processingImport(),
         error: undefined,

@@ -9,11 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  useActivateCarrier,
-  useCarrier,
-  useDeactivateCarrier,
-} from '@/features/carriers/hooks';
+import { useActivateCarrier, useCarrier, useDeactivateCarrier } from '@/features/carriers/hooks';
 import { CarrierFormDialog } from '@/features/carriers/CarrierFormDialog';
 import { useSmsDispatches } from '@/features/sms-dispatches/hooks';
 import { SmsStatusBadge } from '@/routes/shipments/SmsStatusBadge';
@@ -75,7 +71,10 @@ export function CarrierDetailPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="space-y-1">
-        <Link to="/carriers" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+        <Link
+          to="/carriers"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+        >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Volver a transportistas
         </Link>
@@ -183,12 +182,7 @@ export function CarrierDetailPage() {
         </CardContent>
       </Card>
 
-      <CarrierFormDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        mode="edit"
-        carrier={data}
-      />
+      <CarrierFormDialog open={editOpen} onOpenChange={setEditOpen} mode="edit" carrier={data} />
 
       <ConfirmDialog
         open={confirmOpen}

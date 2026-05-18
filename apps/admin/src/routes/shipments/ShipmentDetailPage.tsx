@@ -32,7 +32,10 @@ export function ShipmentDetailPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="space-y-1">
-        <Link to="/shipments" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+        <Link
+          to="/shipments"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+        >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Volver a albaranes
         </Link>
@@ -61,7 +64,9 @@ export function ShipmentDetailPage() {
           <Field label="Notas" value={data.notes} />
           <Field label="Creado" value={formatIsoDateTime(data.created_at)} />
           <Field label="Actualizado" value={formatIsoDateTime(data.updated_at)} />
-          {data.cancelled_at && <Field label="Cancelado" value={formatIsoDateTime(data.cancelled_at)} />}
+          {data.cancelled_at && (
+            <Field label="Cancelado" value={formatIsoDateTime(data.cancelled_at)} />
+          )}
         </CardContent>
       </Card>
 

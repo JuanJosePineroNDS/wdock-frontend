@@ -122,7 +122,9 @@ afterEach(() => {
 });
 
 function setFetchHandler(handler: FetchHandler) {
-  fetchMock.mockImplementation((url: string, init?: RequestInit) => Promise.resolve(handler(url, init)));
+  fetchMock.mockImplementation((url: string, init?: RequestInit) =>
+    Promise.resolve(handler(url, init)),
+  );
 }
 
 function jsonResponse(status: number, body: unknown): Response {

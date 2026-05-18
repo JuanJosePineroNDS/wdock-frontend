@@ -89,8 +89,8 @@ OPENAPI_URL=https://staging.wdock.example.com/api/schema/ pnpm run generate:api
 
 Cada app puede tener su propio `.env.local` (no se commitea). Variables típicas:
 
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
+| Variable            | Descripción                | Ejemplo                 |
+| ------------------- | -------------------------- | ----------------------- |
 | `VITE_API_BASE_URL` | URL base de la API backend | `http://localhost:8000` |
 
 ## Reglas de contribución
@@ -103,13 +103,13 @@ Cada app puede tener su propio `.env.local` (no se commitea). Variables típicas
 
 ## Comandos útiles
 
-| Comando | Descripción |
-|---------|-------------|
-| `pnpm run dev:admin` | Inicia la app admin en modo dev (puerto 5173) |
-| `pnpm run lint` | Ejecuta ESLint sobre todo el repo |
-| `pnpm run typecheck` | Verifica tipos en todos los workspaces |
-| `pnpm run test` | Ejecuta los tests de todos los workspaces |
-| `pnpm run build` | Construye todos los workspaces |
-| `pnpm run format` | Aplica Prettier al repo |
-| `pnpm run format:check` | Verifica formato sin escribir |
+| Comando                 | Descripción                                          |
+| ----------------------- | ---------------------------------------------------- |
+| `pnpm run dev:admin`    | Inicia la app admin en modo dev (puerto 5173)        |
+| `pnpm run lint`         | Ejecuta ESLint sobre todo el repo                    |
+| `pnpm run typecheck`    | Verifica tipos en todos los workspaces               |
+| `pnpm run test`         | Ejecuta los tests de todos los workspaces            |
+| `pnpm run build`        | Construye todos los workspaces                       |
+| `pnpm run format`       | Aplica Prettier al repo                              |
+| `pnpm run format:check` | Verifica formato sin escribir                        |
 | `pnpm run generate:api` | Regenera el cliente API desde el OpenAPI del backend |

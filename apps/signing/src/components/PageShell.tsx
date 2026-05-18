@@ -16,7 +16,9 @@ export function PageShell({ children }: PropsWithChildren) {
             <span className="text-base font-semibold">WDock</span>
           </div>
         </header>
-        <main className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">{children}</main>
+        <main className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          {children}
+        </main>
         <footer className="mt-4 text-center text-xs text-slate-500">
           Firma digital de albaranes
         </footer>

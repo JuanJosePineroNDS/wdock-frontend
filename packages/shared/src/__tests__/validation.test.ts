@@ -58,4 +58,3 @@ describe('isValidCif', () => {
     expect(isValidCif('A1234567')).toBe(false);
   });
 });
-
