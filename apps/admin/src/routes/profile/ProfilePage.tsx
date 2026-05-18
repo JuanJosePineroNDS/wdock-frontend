@@ -34,9 +34,7 @@ export function ProfilePage() {
     <div className="max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Mi perfil</h1>
-        <p className="text-sm text-muted-foreground">
-          Datos de tu cuenta y opciones de seguridad.
-        </p>
+        <p className="text-sm text-muted-foreground">Datos de tu cuenta y opciones de seguridad.</p>
       </div>
 
       {isError && (
@@ -49,9 +47,7 @@ export function ProfilePage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Datos de la cuenta</CardTitle>
-          <CardDescription>
-            Email y rol los gestiona un superadmin desde Usuarios.
-          </CardDescription>
+          <CardDescription>Email y rol los gestiona un superadmin desde Usuarios.</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading || !me ? (
@@ -152,8 +148,7 @@ function ChangePasswordForm() {
   const change = useChangePassword();
 
   const newTooShort = newPassword.length > 0 && newPassword.length < 8;
-  const confirmMismatch =
-    confirmPassword.length > 0 && newPassword !== confirmPassword;
+  const confirmMismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
   const canSubmit =
     currentPassword.length > 0 &&
     newPassword.length >= 8 &&
@@ -200,9 +195,7 @@ function ChangePasswordForm() {
           autoComplete="new-password"
           data-testid="new-password"
         />
-        {newTooShort && (
-          <p className="text-xs text-red-600">Mínimo 8 caracteres.</p>
-        )}
+        {newTooShort && <p className="text-xs text-red-600">Mínimo 8 caracteres.</p>}
       </div>
       <div className="space-y-1">
         <Label htmlFor="confirm-password">Repetir nueva contraseña</Label>

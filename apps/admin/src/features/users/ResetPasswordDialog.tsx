@@ -56,8 +56,7 @@ export function ResetPasswordDialog({ open, onOpenChange, user }: ResetPasswordD
 
   const tooShort = newPassword.length > 0 && newPassword.length < 8;
   const mismatch = confirmPassword.length > 0 && newPassword !== confirmPassword;
-  const canSubmit =
-    newPassword.length >= 8 && newPassword === confirmPassword && !reset.isPending;
+  const canSubmit = newPassword.length >= 8 && newPassword === confirmPassword && !reset.isPending;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -82,9 +81,9 @@ export function ResetPasswordDialog({ open, onOpenChange, user }: ResetPasswordD
       <DialogHeader>
         <DialogTitle>Resetear contraseña</DialogTitle>
         <DialogDescription>
-          Asigna una nueva contraseña para <strong>{user.email}</strong>. Esta acción
-          también desbloquea la cuenta y resetea los intentos fallidos. El usuario podrá
-          cambiarla luego desde su perfil.
+          Asigna una nueva contraseña para <strong>{user.email}</strong>. Esta acción también
+          desbloquea la cuenta y resetea los intentos fallidos. El usuario podrá cambiarla luego
+          desde su perfil.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={onSubmit}>

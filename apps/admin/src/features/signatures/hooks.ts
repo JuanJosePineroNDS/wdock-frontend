@@ -21,10 +21,13 @@ export function useShipmentSignature(shipmentId: string | undefined) {
       if (!shipmentId) {
         throw new Error('Missing shipment id');
       }
-      const { data: dispatchData, error: dispatchError, response: dispatchResponse } =
-        await client.GET('/api/v1/sms-dispatches/', {
-          params: { query: { shipment: shipmentId, status: 'SIGNED' } },
-        });
+      const {
+        data: dispatchData,
+        error: dispatchError,
+        response: dispatchResponse,
+      } = await client.GET('/api/v1/sms-dispatches/', {
+        params: { query: { shipment: shipmentId, status: 'SIGNED' } },
+      });
       if (dispatchError || !dispatchData) {
         throw await unwrapError(dispatchResponse);
       }
@@ -32,10 +35,13 @@ export function useShipmentSignature(shipmentId: string | undefined) {
       if (!signedDispatch) {
         return null;
       }
-      const { data: signatureData, error: signatureError, response: signatureResponse } =
-        await client.GET('/api/v1/signatures/', {
-          params: { query: { sms_dispatch: signedDispatch.id } },
-        });
+      const {
+        data: signatureData,
+        error: signatureError,
+        response: signatureResponse,
+      } = await client.GET('/api/v1/signatures/', {
+        params: { query: { sms_dispatch: signedDispatch.id } },
+      });
       if (signatureError || !signatureData) {
         throw await unwrapError(signatureResponse);
       }
@@ -55,12 +61,9 @@ export function useDownloadSignedPdf() {
   const client = useApiClient();
   return useMutation<string, Error, string>({
     mutationFn: async (signatureId) => {
-      const { data, error, response } = await client.GET(
-        '/api/v1/signatures/{id}/download/',
-        {
-          params: { path: { id: signatureId } },
-        },
-      );
+      const { data, error, response } = await client.GET('/api/v1/signatures/{id}/download/', {
+        params: { path: { id: signatureId } },
+      });
       if (error || !data) {
         throw await unwrapError(response);
       }

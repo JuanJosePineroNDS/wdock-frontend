@@ -48,9 +48,7 @@ export function useUsers(params: UseUsersParams = {}) {
             page: params.page,
             search: params.search,
             ordering: params.ordering ?? 'email',
-            ...(params.showInactive
-              ? ({ show_inactive: true } as Record<string, unknown>)
-              : {}),
+            ...(params.showInactive ? ({ show_inactive: true } as Record<string, unknown>) : {}),
           },
         },
       });

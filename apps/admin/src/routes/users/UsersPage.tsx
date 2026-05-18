@@ -56,8 +56,8 @@ export function UsersPage() {
         <Alert variant="destructive">
           <AlertTitle>Sin permisos</AlertTitle>
           <AlertDescription>
-            Solo un superadmin puede gestionar usuarios. Si crees que es un error, contacta
-            con un administrador.
+            Solo un superadmin puede gestionar usuarios. Si crees que es un error, contacta con un
+            administrador.
           </AlertDescription>
         </Alert>
       </div>
@@ -183,9 +183,7 @@ export function UsersPage() {
       ) : (
         !isLoading && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-sm text-slate-700">
-              No hay usuarios que coincidan con los filtros.
-            </p>
+            <p className="text-sm text-slate-700">No hay usuarios que coincidan con los filtros.</p>
           </div>
         )
       )}
@@ -285,9 +283,7 @@ function ToggleActiveConfirm({ user, isSelf, onClose }: ToggleActiveConfirmProps
     setError(null);
     const onSuccess = () => {
       toast.success(
-        willDeactivate
-          ? `Usuario ${user.email} desactivado`
-          : `Usuario ${user.email} activado`,
+        willDeactivate ? `Usuario ${user.email} desactivado` : `Usuario ${user.email} activado`,
       );
       onClose();
     };

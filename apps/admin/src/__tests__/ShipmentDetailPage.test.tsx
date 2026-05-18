@@ -19,7 +19,9 @@ const mockApi = {
   PATCH: vi.fn(),
 };
 
-function shipment(overrides: { status?: 'PROGRAMMED' | 'SIGNED' | 'IN_PROCESS' | 'CANCELLED' } = {}) {
+function shipment(
+  overrides: { status?: 'PROGRAMMED' | 'SIGNED' | 'IN_PROCESS' | 'CANCELLED' } = {},
+) {
   return {
     id: 's1',
     tenant: 't',
@@ -75,7 +77,9 @@ function signedDispatchListResponse() {
   };
 }
 
-function signaturesListResponse(status: 'RECEIVED' | 'PDF_GENERATED' | 'NOTIFIED' = 'PDF_GENERATED') {
+function signaturesListResponse(
+  status: 'RECEIVED' | 'PDF_GENERATED' | 'NOTIFIED' = 'PDF_GENERATED',
+) {
   return {
     data: {
       count: 1,
@@ -174,27 +178,29 @@ describe('ShipmentDetailPage', () => {
   });
 
   it('shows the download PDF button when SIGNED and the signature has a PDF ready', async () => {
-    mockApi.GET.mockImplementation((path: string, opts?: { params?: { query?: { status?: string } } }) => {
-      if (path === '/api/v1/shipments/{id}/') {
+    mockApi.GET.mockImplementation(
+      (path: string, opts?: { params?: { query?: { status?: string } } }) => {
+        if (path === '/api/v1/shipments/{id}/') {
+          return Promise.resolve({
+            data: shipment({ status: 'SIGNED' }),
+            error: undefined,
+            response: { status: 200 } as Response,
+          });
+        }
+        if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
+          return Promise.resolve(signedDispatchListResponse());
+        }
+        if (path === '/api/v1/signatures/') {
+          return Promise.resolve(signaturesListResponse('PDF_GENERATED'));
+        }
+        // Default empty list (dispatch history without status filter)
         return Promise.resolve({
-          data: shipment({ status: 'SIGNED' }),
+          data: { count: 0, next: null, previous: null, results: [] },
           error: undefined,
           response: { status: 200 } as Response,
         });
-      }
-      if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
-        return Promise.resolve(signedDispatchListResponse());
-      }
-      if (path === '/api/v1/signatures/') {
-        return Promise.resolve(signaturesListResponse('PDF_GENERATED'));
-      }
-      // Default empty list (dispatch history without status filter)
-      return Promise.resolve({
-        data: { count: 0, next: null, previous: null, results: [] },
-        error: undefined,
-        response: { status: 200 } as Response,
-      });
-    });
+      },
+    );
 
     renderWithProviders(<ShipmentDetailPage />, {
       initialPath: '/shipments/s1',
@@ -206,26 +212,28 @@ describe('ShipmentDetailPage', () => {
   });
 
   it('hides the download button when the signature exists but PDF is not generated yet', async () => {
-    mockApi.GET.mockImplementation((path: string, opts?: { params?: { query?: { status?: string } } }) => {
-      if (path === '/api/v1/shipments/{id}/') {
+    mockApi.GET.mockImplementation(
+      (path: string, opts?: { params?: { query?: { status?: string } } }) => {
+        if (path === '/api/v1/shipments/{id}/') {
+          return Promise.resolve({
+            data: shipment({ status: 'SIGNED' }),
+            error: undefined,
+            response: { status: 200 } as Response,
+          });
+        }
+        if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
+          return Promise.resolve(signedDispatchListResponse());
+        }
+        if (path === '/api/v1/signatures/') {
+          return Promise.resolve(signaturesListResponse('RECEIVED'));
+        }
         return Promise.resolve({
-          data: shipment({ status: 'SIGNED' }),
+          data: { count: 0, next: null, previous: null, results: [] },
           error: undefined,
           response: { status: 200 } as Response,
         });
-      }
-      if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
-        return Promise.resolve(signedDispatchListResponse());
-      }
-      if (path === '/api/v1/signatures/') {
-        return Promise.resolve(signaturesListResponse('RECEIVED'));
-      }
-      return Promise.resolve({
-        data: { count: 0, next: null, previous: null, results: [] },
-        error: undefined,
-        response: { status: 200 } as Response,
-      });
-    });
+      },
+    );
 
     renderWithProviders(<ShipmentDetailPage />, {
       initialPath: '/shipments/s1',
@@ -246,33 +254,38 @@ describe('ShipmentDetailPage', () => {
   it('opens the presigned URL in a new tab when the download button is clicked', async () => {
     const user = userEvent.setup();
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
-    mockApi.GET.mockImplementation((path: string, opts?: { params?: { query?: { status?: string }; path?: { id?: string } } }) => {
-      if (path === '/api/v1/shipments/{id}/') {
+    mockApi.GET.mockImplementation(
+      (
+        path: string,
+        opts?: { params?: { query?: { status?: string }; path?: { id?: string } } },
+      ) => {
+        if (path === '/api/v1/shipments/{id}/') {
+          return Promise.resolve({
+            data: shipment({ status: 'SIGNED' }),
+            error: undefined,
+            response: { status: 200 } as Response,
+          });
+        }
+        if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
+          return Promise.resolve(signedDispatchListResponse());
+        }
+        if (path === '/api/v1/signatures/') {
+          return Promise.resolve(signaturesListResponse('PDF_GENERATED'));
+        }
+        if (path === '/api/v1/signatures/{id}/download/' && opts?.params?.path?.id === 'sig-1') {
+          return Promise.resolve({
+            data: { download_url: 'https://s3.example.com/signed.pdf?sig=xyz' },
+            error: undefined,
+            response: { status: 200 } as Response,
+          });
+        }
         return Promise.resolve({
-          data: shipment({ status: 'SIGNED' }),
+          data: { count: 0, next: null, previous: null, results: [] },
           error: undefined,
           response: { status: 200 } as Response,
         });
-      }
-      if (path === '/api/v1/sms-dispatches/' && opts?.params?.query?.status === 'SIGNED') {
-        return Promise.resolve(signedDispatchListResponse());
-      }
-      if (path === '/api/v1/signatures/') {
-        return Promise.resolve(signaturesListResponse('PDF_GENERATED'));
-      }
-      if (path === '/api/v1/signatures/{id}/download/' && opts?.params?.path?.id === 'sig-1') {
-        return Promise.resolve({
-          data: { download_url: 'https://s3.example.com/signed.pdf?sig=xyz' },
-          error: undefined,
-          response: { status: 200 } as Response,
-        });
-      }
-      return Promise.resolve({
-        data: { count: 0, next: null, previous: null, results: [] },
-        error: undefined,
-        response: { status: 200 } as Response,
-      });
-    });
+      },
+    );
 
     renderWithProviders(<ShipmentDetailPage />, {
       initialPath: '/shipments/s1',
