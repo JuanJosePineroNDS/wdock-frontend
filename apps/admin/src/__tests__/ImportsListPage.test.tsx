@@ -95,7 +95,11 @@ describe('ImportsListPage', () => {
     mockApi.GET.mockResolvedValue({
       data: undefined,
       error: { detail: 'boom' },
-      response: { status: 500, statusText: 'Server Error', clone: () => ({ json: async () => null }) } as unknown as Response,
+      response: {
+        status: 500,
+        statusText: 'Server Error',
+        clone: () => ({ json: async () => null }),
+      } as unknown as Response,
     });
 
     renderWithProviders(<ImportsListPage />);

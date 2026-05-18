@@ -338,7 +338,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents": {
+    "/api/v1/documents/": {
         parameters: {
             query?: never;
             header?: never;
@@ -366,7 +366,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents/{id}": {
+    "/api/v1/documents/{id}/": {
         parameters: {
             query?: never;
             header?: never;
@@ -392,7 +392,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents/{id}/evidencias": {
+    "/api/v1/documents/{id}/evidencias/": {
         parameters: {
             query?: never;
             header?: never;
@@ -414,7 +414,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/documents/{id}/pdf": {
+    "/api/v1/documents/{id}/pdf/": {
         parameters: {
             query?: never;
             header?: never;
@@ -816,19 +816,19 @@ export interface components {
             /** Format: uuid */
             readonly user: string | null;
             readonly user_email: string | null;
-            /** @description Identificador del actor externo cuando no hay usuario interno (p.ej. 'transportista_telefono:+34666...'). */
-            readonly actor_externo: string;
-            readonly accion: string;
-            readonly recurso_tipo: string;
+            /** @description External actor identifier when there is no internal user (e.g. 'carrier_phone:+34666...'). */
+            readonly external_actor: string;
+            readonly action: string;
+            readonly resource_type: string;
             /** Format: uuid */
-            readonly recurso_id: string | null;
-            readonly ip_origen: string | null;
+            readonly resource_id: string | null;
+            readonly ip_origin: string | null;
             readonly user_agent: string;
             readonly metadata: unknown;
             /** Format: date-time */
             readonly timestamp: string;
-            readonly hash_anterior: string;
-            readonly hash_actual: string;
+            readonly hash_previous: string;
+            readonly hash_current: string;
         };
         /**
          * @description * `SUPERADMIN` - Superadmin global
@@ -1014,9 +1014,9 @@ export interface components {
              *     * `AUDITOR` - Auditor
              *     * `SOLO_LECTURA` - Sólo lectura
              */
-            rol: components["schemas"]["AuthRole"];
-            /** @description Logical-active flag (separate from is_active). */
-            activo: boolean;
+            role: components["schemas"]["AuthRole"];
+            /** @description Logical-active flag (separate from Django's is_active). */
+            is_active_in_tenant: boolean;
             /** @description Django staff flag — required for /admin access. */
             is_staff: boolean;
             /**
@@ -1030,7 +1030,7 @@ export interface components {
              * Format: date-time
              * @description Last successful login (UTC). null if never logged in.
              */
-            ultimo_login: string | null;
+            last_login_at: string | null;
         };
         PaginatedActivityLogList: {
             /** @example 123 */
@@ -1361,14 +1361,14 @@ export interface operations {
     activity_log_list: {
         parameters: {
             query?: {
-                accion?: string;
+                action?: string;
                 from_date?: string;
                 /** @description Qué campo usar para ordenar los resultados. */
                 ordering?: string;
                 /** @description Un número de página dentro del conjunto de resultados paginado. */
                 page?: number;
-                recurso_id?: string;
-                recurso_tipo?: string;
+                resource_id?: string;
+                resource_type?: string;
                 /** @description Un término de búsqueda. */
                 search?: string;
                 to_date?: string;

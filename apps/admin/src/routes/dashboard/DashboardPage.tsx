@@ -33,7 +33,8 @@ export function DashboardPage() {
   const pendingToday = todayShipments.data?.count ?? todayShipments.data?.results.length ?? 0;
   const inProcessCount = inProcessSms.data?.count ?? inProcessSms.data?.results.length ?? 0;
   const failedCount = failedSms.data?.count ?? failedSms.data?.results.length ?? 0;
-  const activeCarriersTotal = activeCarriers.data?.count ?? activeCarriers.data?.results.length ?? 0;
+  const activeCarriersTotal =
+    activeCarriers.data?.count ?? activeCarriers.data?.results.length ?? 0;
   const latestImport = importsQuery.data?.results[0];
   const latestActivity = recentActivity.data?.results.slice(0, 3) ?? [];
 
@@ -126,10 +127,10 @@ export function DashboardPage() {
               <ul className="divide-y divide-slate-100">
                 {latestActivity.map((entry) => (
                   <li key={entry.id} className="py-2 text-sm">
-                    <p className="font-medium text-slate-900">{humanAction(entry.accion)}</p>
+                    <p className="font-medium text-slate-900">{humanAction(entry.action)}</p>
                     <p className="text-xs text-slate-500">
-                      {humanResource(entry.recurso_tipo)} ·{' '}
-                      {entry.user_email || entry.actor_externo || 'Sistema'} ·{' '}
+                      {humanResource(entry.resource_type)} ·{' '}
+                      {entry.user_email || entry.external_actor || 'Sistema'} ·{' '}
                       {formatIsoDateTime(entry.timestamp)}
                     </p>
                   </li>
@@ -156,11 +157,11 @@ export function DashboardPage() {
                 </div>
                 <div>
                   <span className="text-slate-500">Tenant:</span>{' '}
-                  <span className="font-medium">{user.tenant_nombre}</span>
+                  <span className="font-medium">{user.tenant_name}</span>
                 </div>
                 <div>
                   <span className="text-slate-500">Rol:</span>{' '}
-                  <span className="font-medium uppercase">{user.rol}</span>
+                  <span className="font-medium uppercase">{user.role}</span>
                 </div>
               </>
             ) : (

@@ -14,9 +14,12 @@ describe('useDebounce', () => {
   });
 
   it('debounces value updates', () => {
-    const { result, rerender } = renderHook(({ value }: { value: string }) => useDebounce(value, 200), {
-      initialProps: { value: 'a' },
-    });
+    const { result, rerender } = renderHook(
+      ({ value }: { value: string }) => useDebounce(value, 200),
+      {
+        initialProps: { value: 'a' },
+      },
+    );
     expect(result.current).toBe('a');
     rerender({ value: 'b' });
     expect(result.current).toBe('a');

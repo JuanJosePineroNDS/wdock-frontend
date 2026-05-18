@@ -173,7 +173,12 @@ export function ShipmentEditDialog({ open, onOpenChange, shipment }: ShipmentEdi
           )}
         </DialogBody>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={edit.isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={edit.isPending}
+          >
             Cancelar
           </Button>
           <Button type="submit" disabled={edit.isPending} data-testid="edit-submit">

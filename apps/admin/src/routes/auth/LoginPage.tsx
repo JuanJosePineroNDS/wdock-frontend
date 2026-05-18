@@ -42,7 +42,9 @@ export function LoginPage() {
       if (response.status === 401) {
         setServerError('Credenciales incorrectas. Revisa el email y la contrasena.');
       } else if (response.status >= 500) {
-        setServerError('No se ha podido conectar con el servidor. Vuelve a intentarlo en unos minutos.');
+        setServerError(
+          'No se ha podido conectar con el servidor. Vuelve a intentarlo en unos minutos.',
+        );
       } else {
         setServerError('No se ha podido iniciar sesion. Comprueba los datos introducidos.');
       }
@@ -106,4 +108,3 @@ export function LoginPage() {
     </div>
   );
 }
-

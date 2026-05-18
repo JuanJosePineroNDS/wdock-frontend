@@ -93,7 +93,12 @@ export function DialogBody({ children, className }: { children: ReactNode; class
 
 export function DialogFooter({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-3', className)}>
+    <div
+      className={cn(
+        'flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-3',
+        className,
+      )}
+    >
       {children}
     </div>
   );

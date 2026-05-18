@@ -50,10 +50,7 @@ export function DispatchDialog({ open, onOpenChange, shipment }: DispatchDialogP
     () => carriersQuery.data?.results ?? [],
     [carriersQuery.data],
   );
-  const selected = useMemo(
-    () => carriers.find((c) => c.id === selectedId),
-    [carriers, selectedId],
-  );
+  const selected = useMemo(() => carriers.find((c) => c.id === selectedId), [carriers, selectedId]);
 
   const onSubmit = () => {
     if (!selectedId) return;
@@ -85,7 +82,8 @@ export function DispatchDialog({ open, onOpenChange, shipment }: DispatchDialogP
       <DialogHeader>
         <DialogTitle>Iniciar envío SMS</DialogTitle>
         <DialogDescription>
-          Selecciona el transportista que recibirá el SMS de firma para la salida {shipment.crm_external_id}.
+          Selecciona el transportista que recibirá el SMS de firma para la salida{' '}
+          {shipment.crm_external_id}.
         </DialogDescription>
       </DialogHeader>
       <DialogBody className="space-y-4">
@@ -133,7 +131,9 @@ export function DispatchDialog({ open, onOpenChange, shipment }: DispatchDialogP
           )}
         </div>
         <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
-          <p className="mb-1 font-medium uppercase tracking-wide text-slate-500">Vista previa del SMS</p>
+          <p className="mb-1 font-medium uppercase tracking-wide text-slate-500">
+            Vista previa del SMS
+          </p>
           <p data-testid="dispatch-preview">{buildSmsPreview(shipment, selected)}</p>
         </div>
         {serverError && (

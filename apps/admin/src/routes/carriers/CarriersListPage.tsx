@@ -174,7 +174,9 @@ export function CarriersListPage() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-          <p className="text-sm text-slate-700">No hay transportistas que coincidan con los filtros.</p>
+          <p className="text-sm text-slate-700">
+            No hay transportistas que coincidan con los filtros.
+          </p>
         </div>
       )}
 
@@ -185,10 +187,7 @@ export function CarriersListPage() {
         carrier={editingCarrier}
       />
 
-      <ToggleActiveConfirm
-        carrier={confirmTarget}
-        onClose={() => setConfirmTarget(null)}
-      />
+      <ToggleActiveConfirm carrier={confirmTarget} onClose={() => setConfirmTarget(null)} />
     </div>
   );
 }
@@ -270,7 +269,9 @@ function ToggleActiveConfirm({ carrier, onClose }: ToggleActiveConfirmProps) {
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title={willDeactivate ? `¿Desactivar ${carrier.full_name}?` : `¿Activar ${carrier.full_name}?`}
+      title={
+        willDeactivate ? `¿Desactivar ${carrier.full_name}?` : `¿Activar ${carrier.full_name}?`
+      }
       description={
         willDeactivate
           ? 'El transportista se ocultará de la lista por defecto. Sus envíos previos se conservan.'

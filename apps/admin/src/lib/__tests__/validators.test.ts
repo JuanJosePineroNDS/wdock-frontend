@@ -86,11 +86,7 @@ describe('parsePlatesInput', () => {
   });
 
   it('splits by whitespace and newlines', () => {
-    expect(parsePlatesInput('1234ABC\n4321XYZ 9999ZZZ')).toEqual([
-      '1234ABC',
-      '4321XYZ',
-      '9999ZZZ',
-    ]);
+    expect(parsePlatesInput('1234ABC\n4321XYZ 9999ZZZ')).toEqual(['1234ABC', '4321XYZ', '9999ZZZ']);
   });
 
   it('drops empty entries and uppercases', () => {

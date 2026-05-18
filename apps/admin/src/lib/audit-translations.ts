@@ -37,10 +37,10 @@ export const RESOURCE_LABELS: Record<string, string> = {
   document: 'Documento',
 };
 
-export function humanAction(accion: string): string {
-  return ACTION_LABELS[accion] ?? accion;
+export function humanAction(action: string): string {
+  return ACTION_LABELS[action] ?? action;
 }
 
-export function humanResource(recurso: string): string {
-  return RESOURCE_LABELS[recurso] ?? recurso;
+export function humanResource(resource: string): string {
+  return RESOURCE_LABELS[resource] ?? resource;
 }

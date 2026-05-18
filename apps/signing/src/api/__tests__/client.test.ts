@@ -3,11 +3,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { fetchSigningSession, SigningApiError, submitSignature } from '../client';
 
 function makeFetch(status: number, body: unknown): typeof fetch {
-  return vi.fn(async () =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { 'Content-Type': 'application/json' },
-    }),
+  return vi.fn(
+    async () =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      }),
   ) as unknown as typeof fetch;
 }
 

@@ -32,7 +32,9 @@ export function ImportsListPage() {
       {isError && (
         <Alert variant="destructive">
           <AlertTitle>No se pudo cargar el listado</AlertTitle>
-          <AlertDescription>{error?.message ?? 'Inténtalo de nuevo en unos segundos.'}</AlertDescription>
+          <AlertDescription>
+            {error?.message ?? 'Inténtalo de nuevo en unos segundos.'}
+          </AlertDescription>
         </Alert>
       )}
 

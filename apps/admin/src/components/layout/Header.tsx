@@ -14,7 +14,7 @@ export function Header() {
           <div className="text-right leading-tight">
             <div className="font-medium text-slate-900">{user.email}</div>
             <div className="text-xs text-slate-500">
-              {user.tenant_nombre} · {user.rol}
+              {user.tenant_name} · {user.role}
             </div>
           </div>
         )}

@@ -75,7 +75,8 @@ export function useCancelShipment(id: string) {
   const queryClient = useQueryClient();
   return useMutation<Shipment, Error, CancelShipmentInput | void>({
     mutationFn: async (input) => {
-      const body = input && 'reason' in input && input.reason ? { reason: input.reason } : undefined;
+      const body =
+        input && 'reason' in input && input.reason ? { reason: input.reason } : undefined;
       const { data, error, response } = await client.POST('/api/v1/shipments/{id}/cancel/', {
         params: { path: { id } },
         body,

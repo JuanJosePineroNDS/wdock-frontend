@@ -47,7 +47,11 @@ export function ShipmentActions({ shipment, compact = false }: ShipmentActionsPr
     label: string,
     icon: React.ReactNode,
     onClick: () => void,
-    options: { disabled?: boolean; variant?: 'default' | 'outline' | 'ghost' | 'destructive'; testid?: string } = {},
+    options: {
+      disabled?: boolean;
+      variant?: 'default' | 'outline' | 'ghost' | 'destructive';
+      testid?: string;
+    } = {},
   ) => {
     const { disabled, variant, testid } = options;
     if (compact) {
@@ -83,28 +87,29 @@ export function ShipmentActions({ shipment, compact = false }: ShipmentActionsPr
   return (
     <div className={compact ? 'flex justify-end gap-1' : 'flex flex-wrap gap-2'}>
       {canDispatch &&
-        button('Iniciar envío', <Send className="h-4 w-4" aria-hidden />, () => setDispatchOpen(true), {
-          variant: 'default',
-          testid: 'shipment-action-dispatch',
-        })}
-      {canResend &&
         button(
-          'Reenviar',
-          <RotateCcw className="h-4 w-4" aria-hidden />,
-          onResend,
-          { disabled: resend.isPending, testid: 'shipment-action-resend' },
+          'Iniciar envío',
+          <Send className="h-4 w-4" aria-hidden />,
+          () => setDispatchOpen(true),
+          {
+            variant: 'default',
+            testid: 'shipment-action-dispatch',
+          },
         )}
+      {canResend &&
+        button('Reenviar', <RotateCcw className="h-4 w-4" aria-hidden />, onResend, {
+          disabled: resend.isPending,
+          testid: 'shipment-action-resend',
+        })}
       {canEdit &&
         button('Editar', <Pencil className="h-4 w-4" aria-hidden />, () => setEditOpen(true), {
           testid: 'shipment-action-edit',
         })}
       {canCancel &&
-        button(
-          'Cancelar',
-          <Ban className="h-4 w-4" aria-hidden />,
-          () => setCancelOpen(true),
-          { variant: 'destructive', testid: 'shipment-action-cancel' },
-        )}
+        button('Cancelar', <Ban className="h-4 w-4" aria-hidden />, () => setCancelOpen(true), {
+          variant: 'destructive',
+          testid: 'shipment-action-cancel',
+        })}
 
       {dispatchOpen && (
         <DispatchDialog open={dispatchOpen} onOpenChange={setDispatchOpen} shipment={shipment} />

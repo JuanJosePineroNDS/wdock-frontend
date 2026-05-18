@@ -15,11 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useActivityLog, type ActivityLog } from '@/features/activity-log/hooks';
-import {
-  ACTION_LABELS,
-  humanAction,
-  humanResource,
-} from '@/lib/audit-translations';
+import { ACTION_LABELS, humanAction, humanResource } from '@/lib/audit-translations';
 
 const ACTION_OPTIONS = [
   { value: '', label: 'Todas las acciones' },
@@ -73,22 +69,22 @@ function relativeTime(iso: string): string {
 }
 
 export function ActivityLogPage() {
-  const [accion, setAccion] = useState('');
-  const [recurso, setRecurso] = useState('');
+  const [action, setAction] = useState('');
+  const [resource, setResource] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [search, setSearch] = useState('');
 
   const params = useMemo(
     () => ({
-      accion: accion || undefined,
-      recurso_tipo: recurso || undefined,
+      action: action || undefined,
+      resource_type: resource || undefined,
       from_date: fromDate || undefined,
       to_date: toDate || undefined,
       search: search || undefined,
       ordering: '-timestamp',
     }),
-    [accion, recurso, fromDate, toDate, search],
+    [action, resource, fromDate, toDate, search],
   );
 
   const { data, isLoading, isError, error, refetch, isFetching } = useActivityLog(params);
@@ -120,8 +116,8 @@ export function ActivityLogPage() {
           </label>
           <select
             id="activity-action"
-            value={accion}
-            onChange={(e) => setAccion(e.target.value)}
+            value={action}
+            onChange={(e) => setAction(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {ACTION_OPTIONS.map((opt) => (
@@ -137,8 +133,8 @@ export function ActivityLogPage() {
           </label>
           <select
             id="activity-resource"
-            value={recurso}
-            onChange={(e) => setRecurso(e.target.value)}
+            value={resource}
+            onChange={(e) => setResource(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {RESOURCE_OPTIONS.map((opt) => (
@@ -216,19 +212,22 @@ function ActivityCard({ entry }: { entry: ActivityLog }) {
   const [expanded, setExpanded] = useState(false);
   const metadata = entry.metadata as Record<string, unknown> | null | undefined;
   const hasMetadata = metadata && typeof metadata === 'object' && Object.keys(metadata).length > 0;
-  const isUnknownAction = !(entry.accion in ACTION_LABELS);
+  const isUnknownAction = !(entry.action in ACTION_LABELS);
 
   return (
     <li>
       <Card>
         <CardContent className="flex gap-4 py-4">
           <div className="mt-1 rounded-md bg-slate-100 p-2 text-slate-600">
-            {resourceIcon(entry.recurso_tipo)}
+            {resourceIcon(entry.resource_type)}
           </div>
           <div className="flex-1 space-y-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <span className="text-sm font-medium text-slate-900" data-testid="activity-action-label">
-                {humanAction(entry.accion)}
+              <span
+                className="text-sm font-medium text-slate-900"
+                data-testid="activity-action-label"
+              >
+                {humanAction(entry.action)}
               </span>
               {isUnknownAction && (
                 <span
@@ -240,18 +239,18 @@ function ActivityCard({ entry }: { entry: ActivityLog }) {
                 </span>
               )}
               <span className="text-xs text-slate-500">
-                {humanResource(entry.recurso_tipo)}
-                {entry.recurso_id ? ` · ${entry.recurso_id.slice(0, 8)}` : ''}
+                {humanResource(entry.resource_type)}
+                {entry.resource_id ? ` · ${entry.resource_id.slice(0, 8)}` : ''}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span>{entry.user_email || entry.actor_externo || 'Sistema'}</span>
+              <span>{entry.user_email || entry.external_actor || 'Sistema'}</span>
               <span>·</span>
               <span title={entry.timestamp}>{relativeTime(entry.timestamp)}</span>
-              {entry.ip_origen && (
+              {entry.ip_origin && (
                 <>
                   <span>·</span>
-                  <span>{entry.ip_origen}</span>
+                  <span>{entry.ip_origin}</span>
                 </>
               )}
             </div>

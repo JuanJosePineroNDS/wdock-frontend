@@ -24,7 +24,9 @@ async function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
   });
 }
 
-export async function sha256(input: Blob | ArrayBuffer | ArrayBufferView | string): Promise<string> {
+export async function sha256(
+  input: Blob | ArrayBuffer | ArrayBufferView | string,
+): Promise<string> {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle) {
     throw new Error('Web Crypto API no disponible en este entorno');

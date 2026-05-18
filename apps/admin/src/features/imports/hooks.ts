@@ -44,7 +44,12 @@ export function useImport(id: string | undefined, options: UseImportOptions = {}
   const client = useApiClient();
   const pollingIntervalMs = options.pollingIntervalMs ?? 2000;
 
-  const queryOptions: UseQueryOptions<ExcelImport, Error, ExcelImport, ['imports', string | undefined]> = {
+  const queryOptions: UseQueryOptions<
+    ExcelImport,
+    Error,
+    ExcelImport,
+    ['imports', string | undefined]
+  > = {
     queryKey: ['imports', id],
     queryFn: async () => {
       if (!id) {

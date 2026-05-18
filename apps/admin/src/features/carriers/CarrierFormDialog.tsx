@@ -179,7 +179,9 @@ export function CarrierFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange} blocking={isPending}>
       <DialogHeader>
         <DialogTitle>
-          {mode === 'create' ? 'Nuevo transportista' : `Editar ${carrier?.full_name ?? 'transportista'}`}
+          {mode === 'create'
+            ? 'Nuevo transportista'
+            : `Editar ${carrier?.full_name ?? 'transportista'}`}
         </DialogTitle>
         <DialogDescription>
           {mode === 'create'
@@ -247,7 +249,12 @@ export function CarrierFormDialog({
           )}
         </DialogBody>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
             Cancelar
           </Button>
           <Button type="submit" disabled={isPending} data-testid="carrier-submit">

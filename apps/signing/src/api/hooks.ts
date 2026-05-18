@@ -1,4 +1,9 @@
-import { useMutation, useQuery, type UseMutationResult, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery,
+  type UseMutationResult,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 
 import { fetchSigningSession, SigningApiError, submitSignature } from './client';
 import type {

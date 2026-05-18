@@ -62,7 +62,8 @@ export function CancelConfirmDialog({ open, onOpenChange, shipment }: CancelConf
           </span>
         </DialogTitle>
         <DialogDescription>
-          Los SMS pendientes asociados a esta salida también se cancelarán. Esta acción no se puede deshacer.
+          Los SMS pendientes asociados a esta salida también se cancelarán. Esta acción no se puede
+          deshacer.
         </DialogDescription>
       </DialogHeader>
       <DialogBody className="space-y-3">

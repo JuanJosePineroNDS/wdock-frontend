@@ -112,13 +112,17 @@ export function ImportUploadPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="space-y-1">
-        <Link to="/imports" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+        <Link
+          to="/imports"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+        >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Volver a imports
         </Link>
         <h1 className="text-2xl font-semibold tracking-tight">Subir Excel</h1>
         <p className="text-sm text-muted-foreground">
-          Sube el Excel de Ixnet con las columnas DNI, Nombre, Móvil, Matrícula, Albarán, Fecha y Mercancía.
+          Sube el Excel de Ixnet con las columnas DNI, Nombre, Móvil, Matrícula, Albarán, Fecha y
+          Mercancía.
         </p>
       </div>
 
@@ -182,11 +186,7 @@ export function ImportUploadPage() {
             Cancelar
           </Button>
         </Link>
-        <Button
-          onClick={onSubmit}
-          disabled={!file || upload.isPending}
-          data-testid="excel-submit"
-        >
+        <Button onClick={onSubmit} disabled={!file || upload.isPending} data-testid="excel-submit">
           <Upload className="h-4 w-4" aria-hidden />
           {upload.isPending ? 'Subiendo…' : 'Subir y procesar'}
         </Button>

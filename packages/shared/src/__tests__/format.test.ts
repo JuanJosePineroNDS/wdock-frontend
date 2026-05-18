@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  formatCurrency,
-  formatIsoDate,
-  formatIsoDateTime,
-  formatNumber,
-} from '../utils/format';
+import { formatCurrency, formatIsoDate, formatIsoDateTime, formatNumber } from '../utils/format';
 
 describe('format', () => {
   it('formats ISO date with default pattern dd/MM/yyyy', () => {

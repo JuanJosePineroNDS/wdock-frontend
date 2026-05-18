@@ -61,7 +61,10 @@ export function ImportDetailPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <Link to="/imports" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
+        <Link
+          to="/imports"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+        >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Volver a imports
         </Link>
@@ -95,7 +98,8 @@ export function ImportDetailPage() {
         <Alert variant="destructive">
           <AlertTitle>El procesamiento ha fallado</AlertTitle>
           <AlertDescription>
-            {data.error_message || 'No se han podido procesar las filas. Revisa el archivo y vuelve a intentarlo.'}
+            {data.error_message ||
+              'No se han podido procesar las filas. Revisa el archivo y vuelve a intentarlo.'}
           </AlertDescription>
           <div className="mt-3">
             <Link to="/imports/new">
@@ -113,7 +117,11 @@ export function ImportDetailPage() {
           <SummaryCard label="Transportistas actualizados" value={data.carriers_updated} />
           <SummaryCard label="Albaranes creados" value={data.shipments_created} />
           <SummaryCard label="Albaranes actualizados" value={data.shipments_updated} />
-          <SummaryCard label="Filas con error" value={data.rows_failed} tone={data.rows_failed > 0 ? 'warn' : 'ok'} />
+          <SummaryCard
+            label="Filas con error"
+            value={data.rows_failed}
+            tone={data.rows_failed > 0 ? 'warn' : 'ok'}
+          />
         </div>
       )}
 
