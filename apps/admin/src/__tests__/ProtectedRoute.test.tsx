@@ -34,6 +34,7 @@ describe('ProtectedRoute', () => {
       user: {
         id: 'u',
         email: 'a@b.c',
+        full_name: 'Test Admin',
         role: 'ADMIN',
         is_active_in_tenant: true,
         is_staff: true,

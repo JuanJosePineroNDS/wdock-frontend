@@ -1,11 +1,18 @@
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import { formatIsoDate, formatIsoDateTime } from '@wdock/shared/utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useShipment } from '@/features/shipments/hooks';
+import {
+  useDownloadSignedPdf,
+  useShipmentSignature,
+  type Signature,
+} from '@/features/signatures/hooks';
 import { ShipmentStatusBadge } from './StatusBadge';
 import { ShipmentActions } from './ShipmentActions';
 import { ShipmentDispatchHistory } from './ShipmentDispatchHistory';
@@ -46,7 +53,10 @@ export function ShipmentDetailPage() {
             </h1>
             <ShipmentStatusBadge status={data.status} />
           </div>
-          <ShipmentActions shipment={data} />
+          <div className="flex flex-wrap items-center gap-2">
+            {data.status === 'SIGNED' && <DownloadSignedPdfButton shipmentId={data.id} />}
+            <ShipmentActions shipment={data} />
+          </div>
         </div>
       </div>
 
@@ -93,5 +103,45 @@ function Field({ label, value }: FieldProps) {
       <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
       <p className="text-sm text-slate-900 break-words">{value || '—'}</p>
     </div>
+  );
+}
+
+function isPdfReady(signature: Signature | null | undefined): signature is Signature {
+  if (!signature) return false;
+  return signature.status === 'PDF_GENERATED' || signature.status === 'NOTIFIED';
+}
+
+interface DownloadSignedPdfButtonProps {
+  shipmentId: string;
+}
+
+function DownloadSignedPdfButton({ shipmentId }: DownloadSignedPdfButtonProps) {
+  const { data: signature, isLoading } = useShipmentSignature(shipmentId);
+  const download = useDownloadSignedPdf();
+
+  if (isLoading || !isPdfReady(signature)) {
+    return null;
+  }
+
+  const handleClick = async () => {
+    try {
+      const url = await download.mutateAsync(signature.id);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo descargar el PDF.';
+      toast.error(message);
+    }
+  };
+
+  return (
+    <Button
+      variant="outline"
+      onClick={handleClick}
+      disabled={download.isPending}
+      data-testid="download-signed-pdf"
+    >
+      <Download className="h-4 w-4" aria-hidden />
+      {download.isPending ? 'Generando enlace…' : 'Descargar PDF firmado'}
+    </Button>
   );
 }

@@ -55,6 +55,7 @@ describe('LoginPage', () => {
         user: {
           id: 'u1',
           email: 'admin@wdock.com',
+          full_name: 'Demo Admin',
           role: 'ADMIN',
           is_active_in_tenant: true,
           is_staff: true,
