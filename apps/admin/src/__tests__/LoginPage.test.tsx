@@ -84,11 +84,35 @@ describe('LoginPage', () => {
     expect(useAuthStore.getState().user?.email).toBe('admin@wdock.com');
   });
 
-  it('shows a friendly error on 401', async () => {
+  it('shows the backend detail message on 401', async () => {
     const user = userEvent.setup();
     mockApi.POST.mockResolvedValue({
       data: undefined,
-      error: { detail: 'invalid' },
+      error: {
+        type: 'https://wdock.local/problems/invalid-credentials',
+        title: 'Invalid credentials',
+        status: 401,
+        detail: 'Credenciales incorrectas o cuenta bloqueada.',
+      },
+      response: { status: 401 } as Response,
+    });
+
+    renderLogin();
+    await user.type(screen.getByLabelText(/correo/i), 'admin@wdock.com');
+    await user.type(screen.getByLabelText(/contrasena/i), 'badpass99');
+    await user.click(screen.getByRole('button', { name: /iniciar sesion/i }));
+
+    expect(await screen.findByTestId('login-error')).toHaveTextContent(
+      /credenciales incorrectas o cuenta bloqueada/i,
+    );
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it('falls back to a generic credentials message when 401 has no detail', async () => {
+    const user = userEvent.setup();
+    mockApi.POST.mockResolvedValue({
+      data: undefined,
+      error: undefined,
       response: { status: 401 } as Response,
     });
 
