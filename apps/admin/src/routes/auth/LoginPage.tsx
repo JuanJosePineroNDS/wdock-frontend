@@ -39,14 +39,19 @@ export function LoginPage() {
     });
 
     if (error || !data) {
-      if (response.status === 401) {
-        setServerError('Credenciales incorrectas. Revisa el email y la contrasena.');
-      } else if (response.status >= 500) {
+      const backendDetail =
+        error && typeof (error as { detail?: unknown }).detail === 'string'
+          ? ((error as { detail?: string }).detail ?? '').trim()
+          : '';
+
+      if (response.status >= 500) {
         setServerError(
           'No se ha podido conectar con el servidor. Vuelve a intentarlo en unos minutos.',
         );
+      } else if (backendDetail) {
+        setServerError(backendDetail);
       } else {
-        setServerError('No se ha podido iniciar sesion. Comprueba los datos introducidos.');
+        setServerError('Credenciales incorrectas. Revisa el email y la contrasena.');
       }
       return;
     }

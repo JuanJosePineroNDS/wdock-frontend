@@ -61,7 +61,7 @@ export interface paths {
         put?: never;
         /**
          * Email/password login
-         * @description Validates the user credentials and returns a JWT access + refresh pair plus the authenticated user payload. After 5 consecutive failures the account is locked for 15 minutes (HTTP 423).
+         * @description Validates the user credentials and returns a JWT access + refresh pair plus the authenticated user payload. After ``LOGIN_LOCKOUT_MAX_ATTEMPTS`` consecutive failures the account is locked for ``LOGIN_LOCKOUT_WINDOW_MINUTES``. **All error paths** (unknown user, wrong password, locked account) return the same 401 with a generic message to prevent user enumeration.
          */
         post: operations["auth_login"];
         delete?: never;
@@ -1127,7 +1127,13 @@ export interface components {
          * @enum {string}
          */
         ExcelImportStatusEnum: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
-        /** @description Validates the multipart payload before enqueuing the Celery task. */
+        /**
+         * @description Validates the multipart payload before enqueuing the Celery task.
+         *
+         *     Delegates the heavy lifting to ``services.upload_validation`` which
+         *     enforces magic bytes, content-type and zip-bomb protection on top of the
+         *     size/extension checks done here.
+         */
         ExcelImportUploadRequest: {
             /** Format: binary */
             file: string;
@@ -1674,17 +1680,8 @@ export interface operations {
                     "application/json": components["schemas"]["LoginResponse"];
                 };
             };
-            /** @description Unknown user or wrong password. */
+            /** @description Generic credential failure. Covers unknown user, wrong password and locked account by design. */
             401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetail"];
-                };
-            };
-            /** @description Account locked after too many failed attempts. */
-            423: {
                 headers: {
                     [name: string]: unknown;
                 };
