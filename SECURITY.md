@@ -60,18 +60,18 @@ both `apps/admin/index.html` and `apps/signing/index.html`.
 
 Key directives:
 
-| Directive         | Value                                                                 | Rationale                                                              |
-| ----------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `default-src`     | `'self'`                                                              | Deny everything by default; opt in per resource type.                  |
-| `script-src`      | `'self'`                                                              | No inline scripts, no `eval`, no third-party scripts.                  |
-| `style-src`       | `'self' 'unsafe-inline'`                                              | Tailwind / shadcn require inline styles.                               |
-| `img-src`         | `'self' data: blob:`                                                  | App icons + generated previews + object URLs for downloads.            |
-| `font-src`        | `'self' data:` (admin) / `'self'` (signing)                           | Only system / locally bundled fonts.                                   |
-| `connect-src`     | `'self' http://localhost:8000 http://127.0.0.1:8000 https://api.wdock.es` | Whitelist of API origins for dev and prod.                          |
-| `frame-ancestors` | `'none'`                                                              | Reinforces backend's `X-Frame-Options: DENY` (anti-clickjacking).      |
-| `form-action`     | `'self'`                                                              | Forms cannot post to third parties.                                    |
-| `base-uri`        | `'self'`                                                              | Prevent `<base>` tag hijacking.                                        |
-| `object-src`      | `'none'`                                                              | Disable `<object>`, `<embed>`, Flash, etc.                             |
+| Directive         | Value                                                                     | Rationale                                                         |
+| ----------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `default-src`     | `'self'`                                                                  | Deny everything by default; opt in per resource type.             |
+| `script-src`      | `'self'`                                                                  | No inline scripts, no `eval`, no third-party scripts.             |
+| `style-src`       | `'self' 'unsafe-inline'`                                                  | Tailwind / shadcn require inline styles.                          |
+| `img-src`         | `'self' data: blob:`                                                      | App icons + generated previews + object URLs for downloads.       |
+| `font-src`        | `'self' data:` (admin) / `'self'` (signing)                               | Only system / locally bundled fonts.                              |
+| `connect-src`     | `'self' http://localhost:8000 http://127.0.0.1:8000 https://api.wdock.es` | Whitelist of API origins for dev and prod.                        |
+| `frame-ancestors` | `'none'`                                                                  | Reinforces backend's `X-Frame-Options: DENY` (anti-clickjacking). |
+| `form-action`     | `'self'`                                                                  | Forms cannot post to third parties.                               |
+| `base-uri`        | `'self'`                                                                  | Prevent `<base>` tag hijacking.                                   |
+| `object-src`      | `'none'`                                                                  | Disable `<object>`, `<embed>`, Flash, etc.                        |
 
 Notes:
 
