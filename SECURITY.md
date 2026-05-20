@@ -60,29 +60,32 @@ both `apps/admin/index.html` and `apps/signing/index.html`.
 
 Key directives:
 
-| Directive         | Value                                                                     | Rationale                                                         |
-| ----------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `default-src`     | `'self'`                                                                  | Deny everything by default; opt in per resource type.             |
-| `script-src`      | `'self'`                                                                  | No inline scripts, no `eval`, no third-party scripts.             |
-| `style-src`       | `'self' 'unsafe-inline'`                                                  | Tailwind / shadcn require inline styles.                          |
-| `img-src`         | `'self' data: blob:`                                                      | App icons + generated previews + object URLs for downloads.       |
-| `font-src`        | `'self' data:` (admin) / `'self'` (signing)                               | Only system / locally bundled fonts.                              |
-| `connect-src`     | `'self' http://localhost:8000 http://127.0.0.1:8000 https://api.wdock.es` | Whitelist of API origins for dev and prod.                        |
-| `frame-ancestors` | `'none'`                                                                  | Reinforces backend's `X-Frame-Options: DENY` (anti-clickjacking). |
-| `form-action`     | `'self'`                                                                  | Forms cannot post to third parties.                               |
-| `base-uri`        | `'self'`                                                                  | Prevent `<base>` tag hijacking.                                   |
-| `object-src`      | `'none'`                                                                  | Disable `<object>`, `<embed>`, Flash, etc.                        |
+| Directive     | Value                                                                     | Rationale                                                   |
+| ------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `default-src` | `'self'`                                                                  | Deny everything by default; opt in per resource type.       |
+| `script-src`  | `'self'`                                                                  | No inline scripts, no `eval`, no third-party scripts.       |
+| `style-src`   | `'self' 'unsafe-inline'`                                                  | Tailwind / shadcn require inline styles.                    |
+| `img-src`     | `'self' data: blob:`                                                      | App icons + generated previews + object URLs for downloads. |
+| `font-src`    | `'self' data:` (admin) / `'self'` (signing)                               | Only system / locally bundled fonts.                        |
+| `connect-src` | `'self' http://localhost:8000 http://127.0.0.1:8000 https://api.wdock.es` | Whitelist of API origins for dev and prod.                  |
+| `form-action` | `'self'`                                                                  | Forms cannot post to third parties.                         |
+| `base-uri`    | `'self'`                                                                  | Prevent `<base>` tag hijacking.                             |
+| `object-src`  | `'none'`                                                                  | Disable `<object>`, `<embed>`, Flash, etc.                  |
 
 Notes:
 
 - `'unsafe-inline'` is **only** allowed in `style-src` — never in `script-src`.
-- `X-Frame-Options: DENY` is added by the backend as a real HTTP header. The
-  CSP `frame-ancestors 'none'` is a more modern equivalent and is preferred by
-  current browsers.
+- **Anti-clickjacking** is enforced via the `X-Frame-Options: DENY` HTTP header
+  added by the backend (PR 2 backend) and must also be configured at the
+  CDN/reverse-proxy level for the static `index.html` (see the deployment
+  checklist below). The CSP `frame-ancestors` directive is intentionally
+  omitted from the `<meta>` tag: browsers ignore it when delivered via meta
+  (per the CSP spec), so leaving it in would only produce a console warning
+  without adding protection.
 - The static `<meta>` form of CSP is sufficient for the directives we use. A
   future hardening could move CSP to an HTTP header served by the
   CDN/reverse-proxy in front of the SPAs to also cover `X-Frame-Options`,
-  `Strict-Transport-Security`, etc.
+  `frame-ancestors`, `Strict-Transport-Security`, etc.
 
 ### CDN / reverse-proxy headers (production deployment checklist)
 

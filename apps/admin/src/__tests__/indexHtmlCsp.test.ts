@@ -30,9 +30,9 @@ describe('admin index.html security meta tags', () => {
     expect(scriptSrc).not.toMatch(/unsafe-eval/);
   });
 
-  it('CSP disallows being framed by other origins', () => {
+  it('CSP omits frame-ancestors (browsers ignore it via <meta>; X-Frame-Options HTTP header covers anti-clickjacking)', () => {
     const csp = getCspContent(readHtml());
-    expect(csp).toMatch(/frame-ancestors\s+'none'/);
+    expect(csp).not.toMatch(/frame-ancestors/);
   });
 
   it('CSP forbids plugins/embeds via object-src none', () => {
